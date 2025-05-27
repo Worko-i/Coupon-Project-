@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Client Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Customer 20 Authentication Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Login as Customer 20</h3>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Purchase Coupon</h3>
+        <button onclick="testCouponPurchase()">Test Purchase</button>
+        <div id="purchaseResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Get Available Coupons</h3>
+        <button onclick="testGetCoupons()">Get Coupons</button>
+        <div id="couponsResult" class="result"></div>
+    </div>
+
+    <script>
+        let authToken = null;
+        const baseUrl = 'http://localhost:8082/api';
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch(`${baseUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'customer20@gmail.com',
+                        password: 'password20',
+                        clientType: 'CUSTOMER'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    
+                    // Decode token to show user info
+                    const tokenParts = authToken.split('.');
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Login successful!</div>
+                        <div>User: ${payload.firstName} ${payload.lastName}</div>
+                        <div>Email: ${payload.email}</div>
+                        <div>Client Type: ${payload.clientType}</div>
+                        <div>User ID: ${payload.id}</div>
+                        <div>Token: ${authToken.substring(0, 50)}...</div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed: ${error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testCouponPurchase() {
+            const resultDiv = document.getElementById('purchaseResult');
+            
+            if (!authToken) {
+                resultDiv.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = 'Testing coupon purchase...';
+            
+            try {
+                const response = await fetch(`${baseUrl}/company/customer_coupon/11/6`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Coupon purchase successful!</div>
+                        <div>Purchase ID: ${data.id}</div>
+                        <div>Coupon: ${data.coupon.title}</div>
+                        <div>Price: $${data.coupon.price}</div>
+                        <div>Customer: ${data.customer.firstName} ${data.customer.lastName}</div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<div class="error">❌ Purchase failed: ${error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testGetCoupons() {
+            const resultDiv = document.getElementById('couponsResult');
+            resultDiv.innerHTML = 'Getting available coupons...';
+            
+            try {
+                const response = await fetch(`${baseUrl}/coupon/all`);
+                
+                if (response.ok) {
+                    const coupons = await response.json();
+                    let html = `<div class="success">✅ Found ${coupons.length} coupons:</div>`;
+                    coupons.slice(0, 5).forEach(coupon => {
+                        html += `<div>• ${coupon.title} - $${coupon.price} (ID: ${coupon.id})</div>`;
+                    });
+                    resultDiv.innerHTML = html;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<div class="error">❌ Failed to get coupons: ${error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
