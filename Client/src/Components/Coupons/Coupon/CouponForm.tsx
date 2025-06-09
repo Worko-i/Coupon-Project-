@@ -1,5 +1,19 @@
 import { useForm } from 'react-hook-form';
-import './CouponForm.css'
+import { 
+    Container, 
+    Paper, 
+    Typography, 
+    TextField, 
+    FormControl, 
+    InputLabel, 
+    Select, 
+    MenuItem, 
+    Button, 
+    Box, 
+    Grid,
+    Fade
+} from '@mui/material';
+import { Save as SaveIcon, Add as AddIcon } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import CouponModel from '../../../Models/CouponModel';
 import couponService from '../../../Services/CouponService';
@@ -14,7 +28,6 @@ function Coupon(): JSX.Element {
 
     const { register, handleSubmit, setValue, formState } = useForm<CouponModel>();
     const [categories, setCategories] = useState<CategoryModel[]>([]);
-    const [categorySelected, setCategorySelected] = useState<string>("");
     const navigate = useNavigate();
     const params = useParams();
 
@@ -82,67 +95,181 @@ function Coupon(): JSX.Element {
         }
 }
     return (
-        <div className="coupon-form">
-            <h1>{params.couponId? 'Edit Coupon':'Add Coupon'}</h1>
-            <form onSubmit={handleSubmit(sendCoupon)}>
-                <div className="inputs">
+        <Container maxWidth="md" sx={{ py: 4 }}>
+            <Fade in timeout={600}>
+                <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                    <Box sx={{ 
+                        background: 'linear-gradient(45deg, #2196F3 30%, #9C27B0 90%)',
+                        color: 'white',
+                        p: 3,
+                        textAlign: 'center'
+                    }}>
+                        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+                            {params.couponId ? 'Edit Coupon' : 'Add New Coupon'}
+                        </Typography>
+                    </Box>
+                    
+                    <Box sx={{ p: 4 }}>
+                        <form onSubmit={handleSubmit(sendCoupon)}>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Title"
+                                        variant="outlined"
+                                        {...register("title", {
+                                            required: { value: true, message: "Title field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.title}
+                                        helperText={formState.errors.title?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Title:</label>
-                        <input type="text" placeholder="Title" className='input' {...register("title", {required: {value: true, message: "*Title Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.title?.message && (<span className='error_message'>{formState.errors.title?.message}</span>)}
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth variant="outlined" error={!!formState.errors.category?.name}>
+                                        <InputLabel>Category</InputLabel>
+                                        <Select
+                                            label="Category"
+                                            {...register("category.name", {
+                                                required: { value: true, message: "Category field is mandatory" }
+                                            })}
+                                            defaultValue=""
+                                        >
+                                            {categories.map((category) => (
+                                                <MenuItem key={category.id} value={category.name}>
+                                                    {category.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                        {formState.errors.category?.name && (
+                                            <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
+                                                {formState.errors.category.name.message}
+                                            </Typography>
+                                        )}
+                                    </FormControl>
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Description:</label>
-                        <input type="text" placeholder="Description" className='input' {...register("description", {required: {value: true, message: "*Description Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.description?.message && (<span className='error_message'>{formState.errors.description?.message}</span>)}
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="Description"
+                                        variant="outlined"
+                                        multiline
+                                        rows={3}
+                                        {...register("description", {
+                                            required: { value: true, message: "Description field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.description}
+                                        helperText={formState.errors.description?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                    <label htmlFor="input" className="text">Category:</label>
-                        <select className='input' {...register("category.name", { required: {value: true, message: '*Category Field Is Mandatory'} })}>
-                            <option selected disabled value="">Choose Category</option>
-                            {
-                                categories.map((category) => <option key={category.id}>{category.name}</option>)
-                            }
-                        </select>
-                    </div>
-                    {formState.errors.category?.name && (<span className='error_message'>{formState.errors.category.name.message}</span>)}
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Start Date"
+                                        type="date"
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                        {...register("startDate", {
+                                            required: { value: true, message: "Start date field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.startDate}
+                                        helperText={formState.errors.startDate?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Start Date:</label>
-                        <input type="date" placeholder="Start Date" className='input' {...register("startDate", {required: {value: true, message: "*Start Date Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.startDate?.message &&(<span className='error_message'>{formState.errors.startDate?.message}</span>)}
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="End Date"
+                                        type="date"
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                        {...register("endDate", {
+                                            required: { value: true, message: "End date field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.endDate}
+                                        helperText={formState.errors.endDate?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">End Date:</label>
-                        <input type="date" placeholder="End Date" className='input'{...register("endDate", {required: {value: true, message: "*End Date Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.endDate?.message &&(<span className='error_message'>{formState.errors.endDate?.message}</span>)}
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Amount"
+                                        type="number"
+                                        variant="outlined"
+                                        {...register("amount", {
+                                            required: { value: true, message: "Amount field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.amount}
+                                        helperText={formState.errors.amount?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Amount:</label>
-                        <input type="number" placeholder="Amount" className='input'{...register("amount", {required: {value: true, message: "*Amount Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.amount?.message &&(<span className='error_message'>{formState.errors.amount?.message}</span>)}
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Price"
+                                        type="number"
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+                                        }}
+                                        {...register("price", {
+                                            required: { value: true, message: "Price field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.price}
+                                        helperText={formState.errors.price?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Price:</label>
-                        <input type="number" placeholder="Price" className='input'{...register("price", {required: {value: true, message: "*Price Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.price?.message &&(<span className='error_message'>{formState.errors.price?.message}</span>)}
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="Image URL"
+                                        variant="outlined"
+                                        {...register("image", {
+                                            required: { value: true, message: "Image field is mandatory" }
+                                        })}
+                                        error={!!formState.errors.image}
+                                        helperText={formState.errors.image?.message}
+                                    />
+                                </Grid>
 
-                    <div className="coolinput">
-                        <label htmlFor="input" className="text">Image:</label>
-                        <input type="text" placeholder="Image" className='input'{...register("image", {required: {value: true, message: "*Image Field Is Mandatory"}})} />
-                    </div> 
-                    {formState.errors.image?.message &&(<span className='error_message'>{formState.errors.image?.message}</span>)}
-                    <button className='btn' type="submit">{params.couponId? 'Update Coupon':'Add Coupon'}</button>
-                </div>
-            </form>
-        </div>
+                                <Grid item xs={12}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            size="large"
+                                            startIcon={params.couponId ? <SaveIcon /> : <AddIcon />}
+                                            sx={{
+                                                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                                                borderRadius: 3,
+                                                px: 4,
+                                                py: 1.5,
+                                                fontWeight: 600,
+                                                textTransform: 'none',
+                                                fontSize: '1.1rem',
+                                                boxShadow: '0 6px 20px rgba(33, 150, 243, 0.3)',
+                                                '&:hover': {
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 8px 25px rgba(33, 150, 243, 0.4)',
+                                                }
+                                            }}
+                                        >
+                                            {params.couponId ? 'Update Coupon' : 'Add Coupon'}
+                                        </Button>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </Box>
+                </Paper>
+            </Fade>
+        </Container>
     );
 }
 

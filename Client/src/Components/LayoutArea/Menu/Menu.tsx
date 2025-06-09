@@ -1,12 +1,30 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import './Menu.css'
+import { NavLink, useLocation } from 'react-router-dom';
+import { 
+    List, 
+    ListItem, 
+    ListItemButton, 
+    ListItemIcon, 
+    ListItemText,
+    Divider,
+    Box,
+    Typography
+} from '@mui/material';
+import {
+    Home,
+    Business,
+    People,
+    LocalOffer,
+    AccountCircle,
+    ShoppingCart,
+    Store
+} from '@mui/icons-material';
 import { authStore } from '../../../Redux/AuthState';
 import UserModel from '../../../Models/UserModel';
 
 function Menu(): JSX.Element {
-
     const [user, setUser] = useState<UserModel>();
+    const location = useLocation();
     
     useEffect(() => {
         setUser(authStore.getState().user!);
@@ -14,21 +32,134 @@ function Menu(): JSX.Element {
             setUser(authStore.getState().user!);
         })
 
-        // when you return the component is ruined, so unsubscribe come right before the destruction of the component
         return ()=> unsubscribe();
     },[]);
 
+    const menuItems = [
+        { 
+            path: '/home', 
+            label: 'Home', 
+            icon: <Home />, 
+            showFor: ['all'] 
+        },
+        { 
+            path: '/companies', 
+            label: 'Companies', 
+            icon: <Business />, 
+            showFor: ['ADMIN'] 
+        },
+        { 
+            path: '/customers', 
+            label: 'Customers', 
+            icon: <People />, 
+            showFor: ['ADMIN'] 
+        },
+        { 
+            path: '/coupons', 
+            label: 'Coupons', 
+            icon: <LocalOffer />, 
+            showFor: ['COMPANY'] 
+        },
+        { 
+            path: `/company-details/${user?.id}`, 
+            label: 'Company Details', 
+            icon: <AccountCircle />, 
+            showFor: ['COMPANY'] 
+        },
+        { 
+            path: '/customer/coupons', 
+            label: 'My Coupons', 
+            icon: <ShoppingCart />, 
+            showFor: ['CUSTOMER'] 
+        },
+        { 
+            path: '/coupons', 
+            label: 'Coupons Shop', 
+            icon: <Store />, 
+            showFor: ['CUSTOMER'] 
+        },
+        { 
+            path: `/customer-details/${user?.id}`, 
+            label: 'Customer Details', 
+            icon: <AccountCircle />, 
+            showFor: ['CUSTOMER'] 
+        },
+    ];
+
+    const filteredMenuItems = menuItems.filter(item => 
+        item.showFor.includes('all') || 
+        (user && item.showFor.includes(user.clientType))
+    );
+
     return (
-        <div className="Menu">
-           <NavLink to="/home">Home</NavLink>
-           {user?.clientType ==='ADMIN' && (<NavLink to="/companies">Companies</NavLink>)}
-           {user?.clientType ==='ADMIN' && (<NavLink to="/customers">Customers</NavLink>)}
-           {user?.clientType ==='COMPANY' && (<NavLink to="/coupons">Coupons</NavLink>)}
-           {user?.clientType ==='COMPANY' && (<NavLink to={"/company-details/"+ authStore.getState().user?.id}>Details</NavLink>)}
-           {user?.clientType ==='CUSTOMER' && (<NavLink to="/customer/coupons">My Coupons</NavLink>)}
-           {user?.clientType ==='CUSTOMER' && (<NavLink to="/coupons">Coupons Shop</NavLink>)}
-           {user?.clientType ==='CUSTOMER' && (<NavLink to={"/customer-details/"+ authStore.getState().user?.id}>Details</NavLink>)}
-        </div>
+        <Box sx={{ width: 280, height: '100%' }}>
+            <Box 
+                sx={{ 
+                    p: 2, 
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    textAlign: 'center'
+                }}
+            >
+                <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                    Navigation
+                </Typography>
+            </Box>
+            
+            <List sx={{ pt: 0 }}>
+                {filteredMenuItems.map((item, index) => {
+                    const isActive = location.pathname === item.path;
+                    
+                    return (
+                        <ListItem key={index} disablePadding>
+                            <ListItemButton
+                                component={NavLink}
+                                to={item.path}
+                                sx={{
+                                    py: 1.5,
+                                    px: 2,
+                                    backgroundColor: isActive ? 'primary.light' : 'transparent',
+                                    color: isActive ? 'white' : 'text.primary',
+                                    '&:hover': {
+                                        backgroundColor: isActive ? 'primary.main' : 'action.hover',
+                                    },
+                                    borderRadius: 1,
+                                    mx: 1,
+                                    my: 0.5,
+                                }}
+                            >
+                                <ListItemIcon 
+                                    sx={{ 
+                                        color: isActive ? 'white' : 'primary.main',
+                                        minWidth: 40
+                                    }}
+                                >
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText 
+                                    primary={item.label}
+                                    primaryTypographyProps={{
+                                        fontWeight: isActive ? 600 : 400,
+                                        fontSize: '0.95rem'
+                                    }}
+                                />
+                            </ListItemButton>
+                        </ListItem>
+                    );
+                })}
+            </List>
+            
+            {user && (
+                <>
+                    <Divider sx={{ my: 2 }} />
+                    <Box sx={{ px: 2, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                            Logged in as: {user.clientType}
+                        </Typography>
+                    </Box>
+                </>
+            )}
+        </Box>
     );
 }
 
