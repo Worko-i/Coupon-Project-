@@ -13,27 +13,12 @@ export class AuthState{
         const tokenFromlocalStorage: string|null = localStorage.getItem("token");
 
         if(tokenFromlocalStorage){
-            try {
-                const userFromToken: UserModel = jwtDecode(tokenFromlocalStorage);
-                this.user = userFromToken;
-                const tokenModel: TokenModel = jwtDecode(tokenFromlocalStorage);
-                this.exp = tokenModel.exp;
-                this.token = tokenFromlocalStorage;
-                
-                console.log("🔄 AuthState initialized from localStorage:");
-                console.log("- User:", this.user);
-                console.log("- Token exists:", !!this.token);
-                console.log("- Exp:", this.exp);
-            } catch (error) {
-                console.error("❌ Error decoding token from localStorage:", error);
-                // Clear invalid token
-                localStorage.removeItem("token");
-                this.user = null;
-                this.token = null;
-                this.exp = null;
-            }
-        } else {
-            console.log("📭 No token found in localStorage");
+            const userFromToken: UserModel = jwtDecode(tokenFromlocalStorage);
+            this.user = userFromToken;
+            const tokenModel: TokenModel = jwtDecode(tokenFromlocalStorage);
+            this.exp = tokenModel.exp;
+            this.token = tokenFromlocalStorage;
+            
         }
     }
 }
@@ -66,25 +51,11 @@ export function authReducer(currentState: AuthState = new AuthState, action: Aut
     
     switch(action.type){
         case AuthActionType.Login:
-            try {
-                newState.token = action.payload.token;
-                newState.exp = action.payload.expiration; // Note: payload has 'expiration', not 'exp'
-                const userFromToken: UserModel = jwtDecode(newState.token!);
-                newState.user = userFromToken;
-                localStorage.setItem("token", newState.token!);
-                
-                console.log("✅ Login action processed:");
-                console.log("- Token stored:", !!newState.token);
-                console.log("- User:", newState.user);
-                console.log("- Expiration:", newState.exp);
-            } catch (error) {
-                console.error("❌ Error processing login action:", error);
-                // Reset state on error
-                newState.token = null;
-                newState.user = null;
-                newState.exp = null;
-                localStorage.removeItem("token");
-            }
+            newState.token = action.payload.token;
+            newState.exp = action.payload.exp;
+            const userFromToken: UserModel = jwtDecode(newState.token!);
+            newState.user = userFromToken;
+            localStorage.setItem("token", newState.token!);
             break;
 
 

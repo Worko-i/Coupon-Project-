@@ -10,12 +10,7 @@ class CouponService {
     async addCoupon(coupon: CouponModel): Promise<CouponModel>  {
         tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
 
-        const userId = authStore.getState().user?.id;
-        if (!userId) {
-            throw new Error("Company ID not found. Please login again.");
-        }
-
-        const response = await axios.post<CouponModel>(appConfig.apiAddress + "company/coupon/" + userId, coupon,
+        const response = await axios.post<CouponModel>(appConfig.apiAddress + "company/coupon/" + authStore.getState().user?.id, coupon,
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
         couponStore.dispatch({type:CouponActionType.AddCoupon, payload:response.data});
         return response.data
@@ -52,12 +47,7 @@ class CouponService {
     async getCouponsByCategory(categoryId: number): Promise<CouponModel[]> {
         tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
 
-        const userId = authStore.getState().user?.id;
-        if (!userId) {
-            throw new Error("Company ID not found. Please login again.");
-        }
-
-        const response = await axios.get<CouponModel[]>(appConfig.apiAddress + "company/coupon/byCompanyAndCategory/" + userId + "/" + categoryId,
+        const response = await axios.get<CouponModel[]>(appConfig.apiAddress + "company/coupon/byCompanyAndCategory/" +authStore.getState().user?.id+"/"+categoryId,
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
         couponStore.dispatch({type:CouponActionType.FetchCoupons, payload:response.data});
         return response.data;

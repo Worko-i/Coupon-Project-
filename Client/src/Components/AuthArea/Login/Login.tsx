@@ -13,18 +13,14 @@ const navigate = useNavigate();
 
 
 function login(loginModel: LoginModel): void{
-    console.log("🔐 Login attempt:", loginModel);
     
     authService.login(loginModel)
     .then(response =>{
-        console.log("✅ Login successful!");
-        console.log("Auth state:", authStore.getState());
-        console.log("User ID:", authStore.getState().user?.id);
+        console.log(authStore.getState().user?.id);
         alert("Login Successfull!");
         navigate('/home');
 
     }).catch((error) =>{
-        console.log("❌ Login failed:", error);
         ErrorHandler.handleErrorResponse(error);
     })
 }

@@ -37,15 +37,9 @@ function CouponDetails(): JSX.Element {
         }
     }
     function buyCoupon() {
-        const user = authStore.getState().user;
-        if (!user?.id) {
-            alert("User ID not found. Please login again.");
-            return;
-        }
-        
         const isBuy = window.confirm("To buy this coupon press OK");
         if (isBuy) {
-            customerCouponService.purchaseCoupon(user.id, couponId).then(response => {
+            customerCouponService.purchaseCoupon(authStore.getState().user!.id, couponId).then(response => {
                 alert("The Coupon Has Been Purchased Successfully");
                 navigator('/customer/coupons')
             }).catch(error => {

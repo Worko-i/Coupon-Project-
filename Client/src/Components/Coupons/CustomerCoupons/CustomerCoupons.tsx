@@ -35,21 +35,15 @@ function CusotmerCoupons(): JSX.Element {
             ErrorHandler.handleErrorResponse(error);
         });
 
-        const userId = authStore.getState().user?.id;
-        if (userId) {
-            customerCouponService.getCouponsByCustomer(userId).then((response) => {
-                setCouponsToShow(response);
-                setTimeout(() => {
-                    setLoading(false);
-                }, 1000);
-            }).catch(error => {
+        customerCouponService.getCouponsByCustomer(authStore.getState().user?.id!).then((response) => {
+            setCouponsToShow(response);
+            setTimeout(() => {
                 setLoading(false);
-                ErrorHandler.handleErrorResponse(error);
-            });
-        } else {
+            }, 1000);
+        }).catch(error => {
             setLoading(false);
-            alert("Customer ID not found. Please login again.");
-        }
+            ErrorHandler.handleErrorResponse(error);
+        });
     }, []);
 
     useEffect(() => {

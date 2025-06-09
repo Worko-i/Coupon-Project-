@@ -38,23 +38,17 @@ function Coupons(): JSX.Element {
 
         // return all coupons of the company if the user is a company
         if (authStore.getState().user?.clientType === 'COMPANY') {
-            const userId = authStore.getState().user?.id;
-            if (userId) {
-                couponService.getCouponsByCompany(userId)
-                    .then((response) => {
-                        setCouponsToShow(response);
-                        setTimeout(() => {
-                            setLoading(false);
-                        }, 1000);
-                    })
-                    .catch((error) => {
+            couponService.getCouponsByCompany(authStore.getState().user?.id!)
+                .then((response) => {
+                    setCouponsToShow(response);
+                    setTimeout(() => {
                         setLoading(false);
-                        ErrorHandler.handleErrorResponse(error);
-                    });
-            } else {
-                setLoading(false);
-                alert("Company ID not found. Please login again.");
-            }
+                    }, 1000);
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    ErrorHandler.handleErrorResponse(error);
+                });
 
             // return all coupons if the user is a customer in order of him being able to purchase
         } else {

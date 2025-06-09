@@ -24,10 +24,10 @@ function Menu(): JSX.Element {
            {user?.clientType ==='ADMIN' && (<NavLink to="/companies">Companies</NavLink>)}
            {user?.clientType ==='ADMIN' && (<NavLink to="/customers">Customers</NavLink>)}
            {user?.clientType ==='COMPANY' && (<NavLink to="/coupons">Coupons</NavLink>)}
-           {user?.clientType ==='COMPANY' && user?.id && (<NavLink to={"/company-details/"+ user.id}>Details</NavLink>)}
+           {user?.clientType ==='COMPANY' && (<NavLink to={"/company-details/"+ authStore.getState().user?.id}>Details</NavLink>)}
            {user?.clientType ==='CUSTOMER' && (<NavLink to="/customer/coupons">My Coupons</NavLink>)}
            {user?.clientType ==='CUSTOMER' && (<NavLink to="/coupons">Coupons Shop</NavLink>)}
-           {user?.clientType ==='CUSTOMER' && user?.id && (<NavLink to={"/customer-details/"+ user.id}>Details</NavLink>)}
+           {user?.clientType ==='CUSTOMER' && (<NavLink to={"/customer-details/"+ authStore.getState().user?.id}>Details</NavLink>)}
         </div>
     );
 }
