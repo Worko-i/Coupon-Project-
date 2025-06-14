@@ -203,11 +203,9 @@ function CusotmerCoupons(): JSX.Element {
                         {couponsToShow.length === 0 && (
                             <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
                                 <Typography variant="h6" color="text.secondary">
-                                    You don't have any coupons yet
+                                    No coupons found matching your criteria
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                    Start browsing available coupons to make your first purchase!
-                                </Typography>
+                            
                             </Paper>
                         )}
 
