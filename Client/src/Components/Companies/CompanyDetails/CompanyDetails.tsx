@@ -360,13 +360,15 @@ function CompanyDetails(): JSX.Element {
                 </Grid>
             </Grid>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                open={deleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
-                maxWidth="sm"
-                fullWidth
-            >
+            {/* Delete Confirmation Dialog */}                        <Dialog
+                            open={deleteDialogOpen}
+                            onClose={() => setDeleteDialogOpen(false)}
+                            maxWidth="sm"
+                            fullWidth
+                            aria-describedby="alert-dialog-description"
+                            disableEscapeKeyDown={false}
+                            keepMounted={false}
+                        >
                 <DialogTitle sx={{ fontWeight: 600 }}>
                     Confirm Delete
                 </DialogTitle>

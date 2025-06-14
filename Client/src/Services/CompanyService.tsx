@@ -8,11 +8,17 @@ import tokenService from "./TokenService";
 class CompanyService {
 
     async addCompany(company: CompanyModel): Promise<CompanyModel>  {
-        tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
-        const response = await axios.post<CompanyModel>(appConfig.apiAddress + "admin/company", company,
-        {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
-        companyStore.dispatch({type: CompanyActionType.AddCompany, payload: response.data});
-        return response.data
+        if (tokenService.TokenExpiredHandler(authStore.getState()?.token!)) {
+            throw new Error("Token expired");
+        }
+        const response = await axios.post<CompanyModel>(
+            appConfig.apiAddress + "admin/company", 
+            company,
+            {headers: {"Authorization" : "Bearer " + authStore.getState().token}}
+        );
+        const savedCompany = response.data;
+        companyStore.dispatch({type: CompanyActionType.AddCompany, payload: savedCompany});
+        return savedCompany;
     }
 
     async deleteCompany(id: number): Promise<void>  {

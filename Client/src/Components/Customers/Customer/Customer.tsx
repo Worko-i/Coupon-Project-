@@ -52,12 +52,19 @@ function Customer(): JSX.Element {
         setSuccessMessage('');
 
         if (isEditMode && params.customerId) {
+            // Convert and validate customer ID
             const customerId = +params.customerId;
+            if (isNaN(customerId) || customerId <= 0) {
+                setErrorMessage('Invalid customer ID for update');
+                return;
+            }
+
             customer.id = customerId;
             customerService.updateCustomer(customerId, customer)
                 .then(() => {
                     setSuccessMessage("Customer has been updated successfully!");
                     if (isAdmin && customerId) {
+                        // Use validated ID for navigation
                         setTimeout(() => {
                             navigate(`/customer-details/${customerId}`);
                         }, 1500);
@@ -76,9 +83,19 @@ function Customer(): JSX.Element {
             customerService.addCustomer(customer)
                 .then((savedCustomer) => {
                     setSuccessMessage("Customer has been added successfully!");
-                    if (isAdmin && savedCustomer && savedCustomer.id) {
+                    
+                    // Validate saved customer and ID
+                    if (isAdmin && savedCustomer && typeof savedCustomer.id === 'number' && savedCustomer.id > 0) {
+                        // Store the ID to ensure it's available for navigation
+                        const newCustomerId = savedCustomer.id;
                         setTimeout(() => {
-                            navigate(`/customer-details/${savedCustomer.id}`);
+                            // Double-check ID before navigation
+                            if (typeof newCustomerId === 'number' && newCustomerId > 0) {
+                                navigate(`/customer-details/${newCustomerId}`);
+                            } else {
+                                setErrorMessage('Error: Invalid customer ID for navigation');
+                                navigate('/customers'); // Fallback to customers list
+                            }
                         }, 1500);
                     } else {
                         setTimeout(() => {

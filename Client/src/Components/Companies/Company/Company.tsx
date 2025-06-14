@@ -16,6 +16,7 @@ import {
     Fade
 } from '@mui/material';
 import { Business, Save, Edit } from '@mui/icons-material';
+import { authStore } from '../../../Redux/AuthState';
 
 function Company(): JSX.Element {
     const { register, handleSubmit, setValue, formState } = useForm<CompanyModel>();
@@ -26,6 +27,7 @@ function Company(): JSX.Element {
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     const isEditMode = !!params.companyId;
+    const isAdmin = authStore.getState().user?.clientType === "ADMIN";
 
     useEffect(() => {
         if (params.companyId) {
@@ -43,38 +45,81 @@ function Company(): JSX.Element {
         }
     }, [params.companyId, setValue]);
 
-    function sendCompany(company: CompanyModel): void {
-        setLoading(true);
-        setErrorMessage('');
-        setSuccessMessage('');
+    const [navigationTimer, setNavigationTimer] = useState<NodeJS.Timeout | null>(null);
 
-        if (isEditMode && params.companyId) {
-            company.id = +params.companyId;
-            companyService.updateCompany(company.id, company)
-                .then(() => {
-                    setSuccessMessage("Company has been updated successfully!");
-                    setTimeout(() => {
-                        navigate('/company-details/' + company.id);
-                    }, 1500);
-                })
-                .catch(error => {
-                    ErrorHandler.handleErrorResponse(error);
-                    setErrorMessage('Failed to update company');
-                })
-                .finally(() => setLoading(false));
-        } else {
-            companyService.addCompany(company)
-                .then(() => {
-                    setSuccessMessage("Company has been added successfully!");
-                    setTimeout(() => {
-                        navigate("/companies");
-                    }, 1500);
-                })
-                .catch(error => {
-                    ErrorHandler.handleErrorResponse(error);
-                    setErrorMessage('Failed to add company');
-                })
-                .finally(() => setLoading(false));
+    // Cleanup effect for navigation timer
+    useEffect(() => {
+        return () => {
+            if (navigationTimer) {
+                clearTimeout(navigationTimer);
+            }
+        };
+    }, [navigationTimer]);
+
+    async function sendCompany(company: CompanyModel): Promise<void> {
+        try {
+            // Clear any existing timer
+            if (navigationTimer) {
+                clearTimeout(navigationTimer);
+                setNavigationTimer(null);
+            }
+
+            setLoading(true);
+            setErrorMessage('');
+            setSuccessMessage('');
+
+            if (isEditMode && params.companyId) {
+                // Convert and validate company ID
+                const companyId = +params.companyId;
+                if (isNaN(companyId) || companyId <= 0) {
+                    throw new Error('Invalid company ID for update');
+                }
+                
+                company.id = companyId;
+                await companyService.updateCompany(companyId, company);
+                setSuccessMessage("Company has been updated successfully!");
+                
+                // Set new navigation timer with validated ID
+                const timer = setTimeout(() => {
+                    navigate(`/company-details/${companyId}`);
+                }, 1500);
+                setNavigationTimer(timer);
+            } else {
+                const savedCompany = await companyService.addCompany(company);
+                
+                // Enhanced validation for saved company
+                if (!savedCompany || typeof savedCompany.id !== 'number') {
+                    throw new Error('Failed to get valid company ID after creation');
+                }
+                
+                setSuccessMessage("Company has been added successfully!");
+                
+                // Store company ID to ensure it's available for navigation
+                const newCompanyId = savedCompany.id;
+                
+                // Set new navigation timer with stored ID
+                const timer = setTimeout(() => {
+                    // Double-check ID before navigation
+                    if (typeof newCompanyId === 'number') {
+                        navigate(`/company-details/${newCompanyId}`);
+                    } else {
+                        setErrorMessage('Error: Invalid company ID for navigation');
+                        navigate('/companies'); // Fallback to companies list
+                    }
+                }, 1500);
+                setNavigationTimer(timer);
+            }
+        } catch (error: any) {
+            ErrorHandler.handleErrorResponse(error);
+            if (error.response?.data?.message) {
+                setErrorMessage(error.response.data.message);
+            } else if (error.message) {
+                setErrorMessage(error.message);
+            } else {
+                setErrorMessage('Failed to process company');
+            }
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -172,6 +217,8 @@ function Company(): JSX.Element {
                             <Box
                                 component="form"
                                 onSubmit={handleSubmit(sendCompany)}
+                                noValidate
+                                aria-label={isEditMode ? 'Edit Company Form' : 'Add Company Form'}
                                 sx={{ '& .MuiTextField-root': { mb: 3 } }}
                             >
                                 <TextField
@@ -296,6 +343,7 @@ function Company(): JSX.Element {
                                     variant="contained"
                                     size="large"
                                     disabled={loading}
+                                    aria-label={loading ? 'Processing...' : isEditMode ? 'Update Company' : 'Add Company'}
                                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : 
                                              isEditMode ? <Edit /> : <Save />}
                                     sx={{

@@ -150,7 +150,7 @@ function Coupons(): JSX.Element {
                             fontSize: { xs: '2.5rem', md: '3.5rem' }
                         }}
                     >
-                        Coupon Management
+                        Coupon Shop
                     </Typography>
                     
                     <Typography 
