@@ -44,10 +44,10 @@ class CouponService {
         return response.data;
     }
 
-    async getCouponsByCategory(categoryId: number): Promise<CouponModel[]> {
+    async getCouponsByCategory(category: string): Promise<CouponModel[]> {
         tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
 
-        const response = await axios.get<CouponModel[]>(appConfig.apiAddress + "company/coupon/byCompanyAndCategory/" +authStore.getState().user?.id+"/"+categoryId,
+        const response = await axios.get<CouponModel[]>(appConfig.apiAddress + "company/coupon/byCompanyAndCategory/" +authStore.getState().user?.id+"/"+category,
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
         couponStore.dispatch({type:CouponActionType.FetchCoupons, payload:response.data});
         return response.data;

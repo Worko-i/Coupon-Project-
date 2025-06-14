@@ -15,7 +15,10 @@ import {
     Fade,
     Chip
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { 
+    Add as AddIcon, 
+    FilterList
+} from '@mui/icons-material';
 import { authStore } from '../../Redux/AuthState';
 import CouponModel from '../../Models/CouponModel';
 import couponService from '../../Services/CouponService';
@@ -88,7 +91,10 @@ function Coupons(): JSX.Element {
                 handleOnChange("0") // price is 0 at first
                 break;
             case "Show Coupons By Category":
-                handleOnChange("1"); // show the first category
+                const categories = categoryStore.getState().categoryList;
+                if (categories.length > 0) {
+                    handleOnChange(categories[0].name); // show the first category
+                }
                 break;
             default:
                 setCouponsToShow(couponStore.getState().couponList); // show all coupons by default
@@ -102,33 +108,65 @@ function Coupons(): JSX.Element {
                 setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.price <= parseInt(value)));
                 break;
             case "Show Coupons By Category":
-                setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.category?.id === parseInt(value)));
+                setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.category === value));
                 break;
         }
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-            <Box sx={{ mb: 4 }}>
-                <Typography 
-                    variant="h3" 
-                    component="h1" 
-                    gutterBottom
-                    sx={{ 
-                        fontWeight: 700,
-                        background: 'linear-gradient(45deg, #2196F3 30%, #9C27B0 90%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        textAlign: 'center',
-                        mb: 3
-                    }}
-                >
-                    Coupons
-                </Typography>
-                
-                {authStore.getState().user?.clientType === 'COMPANY' && (
-                    <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Container maxWidth="xl" sx={{ py: 6 }}>
+            {/* Hero Section with Backdrop */}
+            <Box 
+                sx={{ 
+                    mb: 6,
+                    position: 'relative',
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                    background: 'linear-gradient(135deg, #4caf50 0%, #81c784 50%, #a5d6a7 100%)',
+                    color: 'white',
+                    py: 8,
+                    px: 4,
+                    textAlign: 'center',
+                    '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(10px)',
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                    <Typography 
+                        variant="h2" 
+                        component="h1" 
+                        gutterBottom
+                        sx={{ 
+                            fontWeight: 800,
+                            mb: 3,
+                            fontSize: { xs: '2.5rem', md: '3.5rem' }
+                        }}
+                    >
+                        Coupon Management
+                    </Typography>
+                    
+                    <Typography 
+                        variant="h5" 
+                        sx={{ 
+                            mb: 4, 
+                            opacity: 0.9,
+                            fontWeight: 300,
+                            maxWidth: 600,
+                            mx: 'auto'
+                        }}
+                    >
+                        Discover amazing deals and manage your coupon collection with ease
+                    </Typography>
+                    
+                    {authStore.getState().user?.clientType === 'COMPANY' && (
                         <Button
                             component={NavLink}
                             to="/coupons/coupon"
@@ -136,24 +174,27 @@ function Coupons(): JSX.Element {
                             startIcon={<AddIcon />}
                             size="large"
                             sx={{
-                                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                                background: 'rgba(255,255,255,0.2)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255,255,255,0.3)',
                                 borderRadius: 3,
                                 px: 4,
                                 py: 1.5,
                                 fontWeight: 600,
                                 textTransform: 'none',
                                 fontSize: '1.1rem',
-                                boxShadow: '0 6px 20px rgba(33, 150, 243, 0.3)',
+                                color: 'white',
                                 '&:hover': {
+                                    background: 'rgba(255,255,255,0.3)',
                                     transform: 'translateY(-2px)',
-                                    boxShadow: '0 8px 25px rgba(33, 150, 243, 0.4)',
+                                    boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
                                 }
                             }}
                         >
                             Add New Coupon
                         </Button>
-                    </Box>
-                )}
+                    )}
+                </Box>
             </Box>
 
             {loading ? (
@@ -163,69 +204,91 @@ function Coupons(): JSX.Element {
                     <Box>
                         {/* Filter Controls */}
                         <Paper 
-                            elevation={3} 
+                            elevation={6} 
                             sx={{ 
-                                p: 3, 
-                                mb: 4, 
-                                borderRadius: 3,
-                                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+                                p: 4, 
+                                mb: 5, 
+                                borderRadius: 4,
+                                background: 'linear-gradient(135deg, #f8f9fc 0%, #e3f2fd 100%)',
+                                border: '1px solid rgba(76, 175, 80, 0.1)',
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'rgba(255,255,255,0.7)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: 4,
+                                    zIndex: 0
+                                }
                             }}
                         >
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                                Filter Coupons
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-                                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                                    <InputLabel>Filter Type</InputLabel>
-                                    <Select
-                                        value={selectValue}
-                                        onChange={(e) => setSelectValue(e.target.value)}
-                                        label="Filter Type"
-                                    >
-                                        <MenuItem value="Show All Coupons">Show All Coupons</MenuItem>
-                                        <MenuItem value="Show Coupons By Category">Show Coupons By Category</MenuItem>
-                                        <MenuItem value="Show Coupons By Max Price">Show Coupons By Max Price</MenuItem>
-                                    </Select>
-                                </FormControl>
-
-                                {selectValue === "Show Coupons By Category" && (
+                            <Box sx={{ position: 'relative', zIndex: 1 }}>
+                                <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 3, color: '#2e7d32' }}>
+                                    <FilterList sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                    Filter Coupons
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                                        <InputLabel>Category</InputLabel>
+                                        <InputLabel>Filter Type</InputLabel>
                                         <Select
-                                            onChange={(e) => handleOnChange(e.target.value as string)}
-                                            label="Category"
-                                            defaultValue=""
+                                            value={selectValue}
+                                            onChange={(e) => setSelectValue(e.target.value)}
+                                            label="Filter Type"
                                         >
-                                            {categoryStore.getState().categoryList.map(category => (
-                                                <MenuItem key={category.id} value={category.id?.toString()}>
-                                                    {category.name}
-                                                </MenuItem>
-                                            ))}
+                                            <MenuItem value="Show All Coupons">Show All Coupons</MenuItem>
+                                            <MenuItem value="Show Coupons By Category">Show Coupons By Category</MenuItem>
+                                            <MenuItem value="Show Coupons By Max Price">Show Coupons By Max Price</MenuItem>
                                         </Select>
                                     </FormControl>
-                                )}
 
-                                {selectValue === "Show Coupons By Max Price" && (
-                                    <TextField
-                                        type="number"
-                                        label="Max Price"
-                                        variant="outlined"
-                                        defaultValue={0}
-                                        onChange={(e) => handleOnChange(e.target.value)}
-                                        sx={{ minWidth: 150 }}
-                                        InputProps={{
-                                            startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+                                    {selectValue === "Show Coupons By Category" && (
+                                        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                                            <InputLabel>Category</InputLabel>
+                                            <Select
+                                                onChange={(e) => handleOnChange(e.target.value as string)}
+                                                label="Category"
+                                                defaultValue=""
+                                            >
+                                                {categoryStore.getState().categoryList.map(category => (
+                                                    <MenuItem key={category.id} value={category.name}>
+                                                        {category.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    )}
+
+                                    {selectValue === "Show Coupons By Max Price" && (
+                                        <TextField
+                                            type="number"
+                                            label="Max Price"
+                                            variant="outlined"
+                                            defaultValue={0}
+                                            onChange={(e) => handleOnChange(e.target.value)}
+                                            sx={{ minWidth: 150 }}
+                                            InputProps={{
+                                                startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+                                            }}
+                                        />
+                                    )}
+                                </Box>
+                                
+                                <Box sx={{ mt: 3 }}>
+                                    <Chip 
+                                        label={`${couponsToShow.length} coupon${couponsToShow.length !== 1 ? 's' : ''} found`}
+                                        color="primary"
+                                        variant="filled"
+                                        sx={{ 
+                                            fontWeight: 600,
+                                            background: 'linear-gradient(45deg, #4caf50 30%, #81c784 90%)',
+                                            color: 'white'
                                         }}
                                     />
-                                )}
-                            </Box>
-                            
-                            <Box sx={{ mt: 2 }}>
-                                <Chip 
-                                    label={`${couponsToShow.length} coupon${couponsToShow.length !== 1 ? 's' : ''} found`}
-                                    color="primary"
-                                    variant="outlined"
-                                />
+                                </Box>
                             </Box>
                         </Paper>
 

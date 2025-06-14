@@ -1,25 +1,59 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Box, Typography, CircularProgress } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    background: {
+      default: '#f8fafc',
+    },
+  },
+});
+
+// The main App component now simply redirects to the actual application
+// The real application structure is in Layout component which is rendered in index.tsx
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          textAlign: 'center',
+        }}
+      >
+        <CircularProgress 
+          sx={{ 
+            color: 'white', 
+            mb: 3,
+            '& .MuiCircularProgress-circle': {
+              strokeLinecap: 'round',
+            }
+          }} 
+          size={60}
+          thickness={4}
+        />
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{ 
+            fontWeight: 300,
+            letterSpacing: '0.5px',
+            fontFamily: 'Roboto, Inter, Segoe UI, Helvetica Neue, sans-serif',
+          }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          Loading Coupon System...
+        </Typography>
+      </Box>
+    </ThemeProvider>
   );
 }
 

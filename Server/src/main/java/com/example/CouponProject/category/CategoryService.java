@@ -1,14 +1,33 @@
 package com.example.CouponProject.category;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.CouponProject.enums.CategoryType;
+
 import java.util.List;
 
-import com.example.CouponProject.exception.CategoryException;
+@Service
+public class CategoryService {
 
-public interface CategoryService {
-    Category addCategory(Category category) throws CategoryException;
-    Category getCategory(int id) throws CategoryException;
-    List<Category> getCategories();
-    void updateCategory(int id, Category category) throws CategoryException;
-    void deleteCategory(int id) throws CategoryException;
-    boolean isCategoryExist(int categoryId);
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    public void initializeCategories() {
+        // Check if categories already exist
+        if (categoryRepository.count() > 0) {
+            return; // Categories already initialized
+        }
+
+        // Add all enum categories to database
+        for (CategoryType categoryType : CategoryType.values()) {
+            Category category = Category.builder()
+                .name(categoryType.getDisplayName())
+                .build();
+            categoryRepository.save(category);
+        }
+    }
+
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
 }

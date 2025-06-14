@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.CouponProject.coupon.Coupon;
 import com.example.CouponProject.coupon.CouponService;
 import com.example.CouponProject.customer.CustomerDTO;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.exception.AuthorizationException;
 import com.example.CouponProject.exception.CouponException;
 import com.example.CouponProject.exception.CustomerCouponException;
@@ -93,9 +94,9 @@ public class CustomerCouponController {
     public List<Coupon> getAllCouponsPurchasedByCustomerId(@PathVariable int customerId) throws AuthorizationException {
         return this.customerCouponService.getAllCouponsPurchasedByCustomerId(customerId);
     }
-    @GetMapping("/company/customer_coupon/byCustomerAndCategory/{customerId}/{categoryId}")
-    public List<Coupon> getAllCouponsByCustomerIdAndCategoryId(@PathVariable int customerId, @PathVariable int categoryId) throws AuthorizationException {
-        return this.customerCouponService.getAllCouponsByCustomerIdAndCategoryId(customerId, categoryId);
+    @GetMapping("/company/customer_coupon/byCustomerAndCategory/{customerId}/{category}")
+    public List<Coupon> getAllCouponsByCustomerIdAndCategory(@PathVariable int customerId, @PathVariable CategoryType category) throws AuthorizationException {
+        return this.customerCouponService.getAllCouponsByCustomerIdAndCategory(customerId, category);
     }
     @GetMapping("/company/customer_coupon/byCustomerAndMaxPrice/{customerId}/{maxPrice}")
     public List<Coupon> getAllCouponsByCustomerIdAndMaxPrice(@PathVariable int customerId, @PathVariable double maxPrice) throws AuthorizationException {

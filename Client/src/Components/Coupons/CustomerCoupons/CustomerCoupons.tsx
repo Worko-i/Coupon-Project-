@@ -66,7 +66,10 @@ function CusotmerCoupons(): JSX.Element {
                 handleOnChange("0") // price is 0
                 break;
             case "Show Coupons By Category":
-                handleOnChange("1"); // show the first category
+                const categories = categoryStore.getState().categoryList;
+                if (categories.length > 0) {
+                    handleOnChange(categories[0].name); // show the first category
+                }
                 break;
             default:
                 setCouponsToShow(couponStore.getState().couponList); // show all coupons by default
@@ -79,7 +82,7 @@ function CusotmerCoupons(): JSX.Element {
                 setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.price <= parseInt(value)));
                 break;
             case "Show Coupons By Category":
-                setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.category?.id === parseInt(value)));
+                setCouponsToShow(couponStore.getState().couponList.filter(coupon => coupon.category === value));
                 break;
         }
     }
@@ -155,7 +158,7 @@ function CusotmerCoupons(): JSX.Element {
                                             defaultValue=""
                                         >
                                             {categoryStore.getState().categoryList.map(category => (
-                                                <MenuItem key={category.id} value={category.id?.toString()}>
+                                                <MenuItem key={category.id} value={category.name}>
                                                     {category.name}
                                                 </MenuItem>
                                             ))}

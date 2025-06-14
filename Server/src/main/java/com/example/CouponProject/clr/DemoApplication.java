@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.example.CouponProject.category.Category;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.category.CategoryService;
 import com.example.CouponProject.company.Company;
 import com.example.CouponProject.company.CompanyDTO;
@@ -49,6 +49,10 @@ public class DemoApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Always initialize categories (they have their own check for duplicates)
+        categoryService.initializeCategories();
+        System.out.println("Categories initialized in database.");
+
         // Check if data already exists to prevent duplicate entry errors
         try {
             // Check if there are any companies - if the first company exists, assume data is initialized
@@ -60,8 +64,8 @@ public class DemoApplication implements CommandLineRunner {
             // Continue with data initialization
         }
 
-        //defining categories for the project
-        final String[]arr = {"Sport", "Fast Food", "Vacation", "Fashion", "Business", "Gaming", "Toys", "Vehicles", "Beverages", "Cleaning Supplies"};
+        //defining categories for the project - these are now handled by the CategoryType enum
+        // No need to add categories to database since we're using enum
 
         // adding companies to the database
         for (int i = 1; i <= 10; i++) {
@@ -72,17 +76,6 @@ public class DemoApplication implements CommandLineRunner {
             } catch (Exception e) {
                 System.out.println("Error adding company " + i + ": " + e.getMessage());
                 // Continue with the next company
-            }
-        }
-
-        // adding categories to the database
-        for (int i = 0; i < 10; i++) {
-            try {
-                Category category = Category.builder().name(arr[i]).build();
-                this.categoryService.addCategory(category);
-            } catch (Exception e) {
-                System.out.println("Error adding category " + arr[i] + ": " + e.getMessage());
-                // Continue with the next category
             }
         }
 
@@ -99,7 +92,20 @@ public class DemoApplication implements CommandLineRunner {
 
         for (int i = 1; i <= 10; i++) {
             try {
-                Coupon coupon = Coupon.builder().title("coupon" + i).description("description" + i).category(this.categoryService.getCategory(random.nextInt(1,11))).startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(100 + i)).amount(i*5).price(20 * i).image("image" + i).build();
+                // Use enum categories instead of database categories
+                CategoryType[] categories = CategoryType.values();
+                CategoryType randomCategory = categories[random.nextInt(categories.length)];
+                
+                Coupon coupon = Coupon.builder()
+                    .title("coupon" + i)
+                    .description("description" + i)
+                    .category(randomCategory)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now().plusDays(100 + i))
+                    .amount(i*5)
+                    .price(20 * i)
+                    .image("image" + i)
+                    .build();
                 CouponDTO couponDTO = this.modelMapper.map(coupon, CouponDTO.class);
                 this.couponService.addCoupon(couponDTO, random.nextInt(1,11));
             } catch (Exception e) {

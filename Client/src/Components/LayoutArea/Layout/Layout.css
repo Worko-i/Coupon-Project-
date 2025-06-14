@@ -1,30 +1,129 @@
+/* Enhanced Layout Styles for Optimal Desktop UX */
 .Layout {
-    height: 100%;
-    text-align: center;
-}
-
-.Layout > .red {
-    color: red;
-}
-
-.Layout > header, .Layout > footer {
-    height: 10%;
-    border: 2px solid black;
-    box-sizing: border-box;
-}
-
-.content > main {
-    border: 2px solid black;
-    width: 90%;
-}
-
-.content > aside {
-    width: 10%;
-    padding:  0;
-    border: 2px solid black;
-}
-
-.Layout > .content {
-    height: 80%;
+    height: 100vh;
+    width: 100vw;
     display: flex;
+    flex-direction: column;
+    font-family: 'Roboto', 'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+/* Header Styles */
+.Layout > header {
+    height: 70px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+}
+
+/* Main Content Area */
+.content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+/* Sidebar Navigation */
+.content > aside {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* Main Content */
+.content > main {
+    flex: 1;
+    overflow: auto;
+    background-color: #f8fafc;
+    padding: 24px 32px;
+    scroll-behavior: smooth;
+}
+
+/* Footer Styles */
+.Layout > footer {
+    height: 70px;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: #212121;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive Design for Large Screens */
+@media (min-width: 1200px) {
+    .content > main {
+        padding: 32px 48px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .content > main {
+        padding: 40px 64px;
+    }
+}
+
+/* Custom Scrollbar for Main Content */
+.content > main::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content > main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content > main::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.content > main::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Focus Styles for Accessibility */
+.Layout *:focus-visible {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .Layout {
+        background-color: white;
+        color: black;
+    }
+    
+    .content > aside {
+        border-right: 2px solid black;
+    }
+    
+    .Layout > header {
+        border-bottom: 2px solid black;
+    }
+    
+    .Layout > footer {
+        border-top: 2px solid black;
+        background-color: black;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .content > main {
+        scroll-behavior: auto;
+    }
+    
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
 }

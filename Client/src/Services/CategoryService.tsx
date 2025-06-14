@@ -1,15 +1,15 @@
 import axios from "axios";
 import appConfig from "../Configuration/config";
 import { authStore } from "../Redux/AuthState";
-import CategoryModel from "../Models/CategoryModel";
+import CategoryModel, { CategoryType } from "../Models/CategoryModel";
 import { CategoryActionType, categoryStore } from "../Redux/CategoryState";
 import tokenService from "./TokenService";
 
 class CategoryService {
 
-    async getSingleCategory(cateogryId: number): Promise<CategoryModel> {
-        tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
-        const response = await axios.get<CategoryModel>(appConfig.apiAddress + "category/" +cateogryId,
+    async getSingleCategory(categoryName: string): Promise<CategoryType> {
+        tokenService.TokenExpiredHandler(authStore.getState()?.token!);
+        const response = await axios.get<CategoryType>(appConfig.apiAddress + "category/" + categoryName,
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
         return response.data;
     }
@@ -19,10 +19,17 @@ class CategoryService {
         if(tokenService.isTokenExpired()){
             return [];
         }
-        const response = await axios.get<CategoryModel[]>(appConfig.apiAddress + "category",
+        const response = await axios.get<CategoryType[]>(appConfig.apiAddress + "category",
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
-        categoryStore.dispatch({type: CategoryActionType.FetchCategories, payload: response.data});
-        return response.data;
+        
+        // Convert enum values to CategoryModel for backwards compatibility
+        const categoryModels: CategoryModel[] = response.data.map((categoryType, index) => ({
+            id: index + 1, // Generate ID for backwards compatibility
+            name: categoryType
+        }));
+        
+        categoryStore.dispatch({type: CategoryActionType.FetchCategories, payload: categoryModels});
+        return categoryModels;
     }
 }
 

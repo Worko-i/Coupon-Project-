@@ -1,4 +1,4 @@
-import CategoryModel from "./CategoryModel";
+import { CategoryType } from "./CategoryModel";
 
 interface CouponModel{
     
@@ -10,7 +10,7 @@ interface CouponModel{
     amount: number;
     price: number;
     image: string;
-    category: CategoryModel;
+    category: CategoryType;
     
 }
 

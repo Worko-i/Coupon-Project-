@@ -141,7 +141,7 @@ function CouponDetails(): JSX.Element {
                                                             Category
                                                         </Typography>
                                                         <Typography variant="body1" fontWeight={500}>
-                                                            {coupon.category?.name}
+                                                            {coupon.category}
                                                         </Typography>
                                                     </Box>
                                                 </Box>

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Box } from '@mui/material';
 import Login from "../AuthArea/Login/Login";
 import Companies from "../Companies/Companies";
 import Company from "../Companies/Company/Company";
@@ -17,7 +18,7 @@ import { authStore } from "../../Redux/AuthState";
 
 function Routing(): JSX.Element{
     return(
-        <div className="Routing">
+        <Box sx={{ height: '100%', width: '100%', overflow: 'auto' }}>
             <Routes>
                 {/*Login*/}
                 <Route path="/login" element = {<Login />}/>
@@ -53,7 +54,7 @@ function Routing(): JSX.Element{
                 <Route path="/" element={<Navigate to="/home" />} />
 
             </Routes>
-        </div>
+        </Box>
     )
 }
 export default Routing;

@@ -46,13 +46,13 @@ function Coupon(): JSX.Element {
             const couponFromState: CouponModel = couponStore.getState().couponList.find(coupon => coupon.id === couponId)!;
             setValue('title', couponFromState.title, {shouldValidate: true});
             setValue('description', couponFromState.description, {shouldValidate: true}); 
-            setValue('category.name', couponFromState.category.name, { shouldValidate: false });   
+            setValue('category', couponFromState.category, { shouldValidate: false });   
             setValue('startDate', couponFromState.startDate, {shouldValidate: true});
             setValue('endDate', couponFromState.endDate, {shouldValidate: true});
             setValue('amount', couponFromState.amount, {shouldValidate: true});
             setValue('price', couponFromState.price, {shouldValidate: true});
             setValue('image', couponFromState.image, {shouldValidate: true});
-            console.log(couponFromState.category.name);
+            console.log(couponFromState.category);
             console.log(categories);
         }
     },[categories])
@@ -62,11 +62,6 @@ function Coupon(): JSX.Element {
         console.log(coupon);
         if(params.couponId){
             coupon.id = +params.couponId;
-            if((categoryStore.getState().categoryList.filter(category => category.name === coupon.category.name)).at(0) !== undefined){
-                const category: CategoryModel = categoryStore.getState().categoryList.filter(category => category.name === coupon.category.name).at(0)!;
-                coupon.category = category;
-            }
-
             console.log(coupon);
             couponService.updateCoupon(coupon.id, coupon).then(response => {
                 alert("The Coupon Has Been Updated Successfully");
@@ -78,14 +73,6 @@ function Coupon(): JSX.Element {
         }
 
         else{
-           if((categoryStore.getState().categoryList.filter(category => category.name === coupon.category.name)).at(0) !== undefined ){
-            const category: CategoryModel = categoryStore.getState().categoryList.filter(category => category.name === coupon.category.name).at(0)!;
-            coupon.category = category;
-           }
-           else{
-           const category: CategoryModel = categoryStore.getState().categoryList.at(0)!;
-           coupon.category = category;
-           }
             couponService.addCoupon(coupon).then(resopnse => {  
                 alert("The Coupon Has Been Added Successfully");
                 navigate("/coupons")
@@ -126,11 +113,11 @@ function Coupon(): JSX.Element {
                                 </Grid>
 
                                 <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth variant="outlined" error={!!formState.errors.category?.name}>
+                                    <FormControl fullWidth variant="outlined" error={!!formState.errors.category}>
                                         <InputLabel>Category</InputLabel>
                                         <Select
                                             label="Category"
-                                            {...register("category.name", {
+                                            {...register("category", {
                                                 required: { value: true, message: "Category field is mandatory" }
                                             })}
                                             defaultValue=""
@@ -141,9 +128,9 @@ function Coupon(): JSX.Element {
                                                 </MenuItem>
                                             ))}
                                         </Select>
-                                        {formState.errors.category?.name && (
+                                        {formState.errors.category && (
                                             <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
-                                                {formState.errors.category.name.message}
+                                                {formState.errors.category.message}
                                             </Typography>
                                         )}
                                     </FormControl>

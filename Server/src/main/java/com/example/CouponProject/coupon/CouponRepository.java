@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.CouponProject.category.Category;
+import com.example.CouponProject.enums.CategoryType;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer> {
 
     List<Coupon> findAllByCompanyId(int companyId);
 
-    List<Coupon> findAllByCategory(Category category);
+    List<Coupon> findAllByCategory(CategoryType category);
 
-    List<Coupon> findAllByCompanyIdAndCategoryId(int companyId, int categoryId);
+    List<Coupon> findAllByCompanyIdAndCategory(int companyId, CategoryType category);
 
     @Query(value = "SELECT * FROM coupon_website3.coupons WHERE company_id = ? AND price <= ?;", nativeQuery = true)
     List<Coupon> findAllByCompanyIdAndMaxPrice(int companyId, double maxPrice);

@@ -4,213 +4,255 @@ import {
     Container, 
     Grid, 
     Card, 
-    CardContent
+    CardContent,
+    Fab,
+    useScrollTrigger,
+    Zoom,
+    Fade,
+    Button
 } from '@mui/material';
 import { 
     LocalOffer, 
     ShoppingCart,
-    TrendingUp,
-    Security
+    KeyboardArrowUp
 } from '@mui/icons-material';
+import { useEffect, useState } from 'react';
+
+// Scroll to top component
+function ScrollTop() {
+    const trigger = useScrollTrigger({
+        target: window,
+        disableHysteresis: true,
+        threshold: 100,
+    });
+
+    const handleClick = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+
+    return (
+        <Zoom in={trigger}>
+            <Fab
+                onClick={handleClick}
+                color="primary"
+                size="small"
+                aria-label="scroll back to top"
+                sx={{
+                    position: 'fixed',
+                    bottom: 20,
+                    right: 20,
+                    zIndex: 1000,
+                    boxShadow: '0 8px 24px rgba(25, 118, 210, 0.3)',
+                }}
+            >
+                <KeyboardArrowUp />
+            </Fab>
+        </Zoom>
+    );
+}
 
 function Home(): JSX.Element {  
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        setIsVisible(true);
+    }, []);
+
     const features = [
         {
             icon: <LocalOffer sx={{ fontSize: 52 }} />,
-            title: "Create Coupons",
-            description: "Companies can easily create and manage promotional coupons for their marketing campaigns."
+            title: "Create & Manage Coupons",
+            description: "Companies can easily create, update, and manage promotional coupons with advanced settings."
         },
         {
             icon: <ShoppingCart sx={{ fontSize: 52 }} />,
-            title: "Purchase Coupons",
-            description: "Customers can browse and purchase coupons with quantity and validity limitations."
-        },
-        {
-            icon: <TrendingUp sx={{ fontSize: 52 }} />,
-            title: "Track Performance",
-            description: "Monitor coupon usage and generate revenue from customer purchases and company subscriptions."
-        },
-        {
-            icon: <Security sx={{ fontSize: 52 }} />,
-            title: "Secure System",
-            description: "Advanced authentication and authorization system with role-based access control."
+            title: "Purchase & Redeem",
+            description: "Customers can browse, purchase, and redeem coupons with intelligent limitations."
         }
     ];
 
     return (
         <Box 
             sx={{
-                height: '100vh',
-                overflowY: 'auto',
-                overflowX: 'hidden',
+                width: '100%',
+                height: '100%',
+                overflow: 'auto',
                 scrollBehavior: 'smooth',
-                padding: '0 0 2.5rem 0',
+                // Enhanced scrollbar styling
                 '&::-webkit-scrollbar': {
-                    width: '10px',
+                    width: '8px',
                 },
                 '&::-webkit-scrollbar-track': {
-                    background: '#f1f1f1',
-                    borderRadius: '5px',
+                    background: 'rgba(0,0,0,0.05)',
+                    borderRadius: '4px',
                 },
                 '&::-webkit-scrollbar-thumb': {
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: '5px',
+                    background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                    borderRadius: '4px',
                     '&:hover': {
-                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                        background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
                     },
                 },
             }}
         >
             {/* Hero Section */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    py: 16,
-                    mb: 8,
-                    borderRadius: 3,
-                    textAlign: 'center'
-                }}
-            >
-                <Container maxWidth="md">
-                    <Typography 
-                        variant="h1" 
-                        component="h1" 
-                        gutterBottom
-                        sx={{ 
-                            fontWeight: 700,
-                            mb: 3,
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-                        }}
-                    >
-                        Welcome To Our Coupon System!
-                    </Typography>
-                    <Typography 
-                        variant="h4" 
-                        sx={{ 
-                            mb: 6,
-                            opacity: 0.9,
-                            lineHeight: 1.6
-                        }}
-                    >
-                        The ultimate platform for companies and customers to create, manage, and purchase promotional coupons
-                    </Typography>
-                </Container>
-            </Box>
+            <Fade in={isVisible} timeout={1000}>
+                <Box
+                    sx={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        py: 12,
+                        mb: 6,
+                        textAlign: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.05"%3E%3Cpath d="m0 40l40-40h-40v40z"/%3E%3C/g%3E%3C/svg%3E")',
+                        }
+                    }}
+                >
+                    <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+                        <Typography 
+                            variant="h1" 
+                            component="h1" 
+                            gutterBottom
+                            sx={{ 
+                                fontWeight: 700,
+                                mb: 3,
+                                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                                fontSize: { xs: '2.5rem', md: '3.5rem' }
+                            }}
+                        >
+                            Welcome to the Future of Coupon Management
+                        </Typography>
+                        <Typography 
+                            variant="h5" 
+                            sx={{ 
+                                mb: 4,
+                                opacity: 0.95,
+                                lineHeight: 1.6,
+                                fontWeight: 400,
+                                maxWidth: '600px',
+                                margin: '0 auto 32px auto',
+                            }}
+                        >
+                            The ultimate platform for companies and customers to create, manage, and purchase promotional coupons
+                        </Typography>
+
+                        <Button
+                            variant="contained"
+                            size="large"
+                            sx={{
+                                backgroundColor: 'white',
+                                color: 'primary.main',
+                                fontWeight: 600,
+                                px: 4,
+                                py: 1.5,
+                                fontSize: '1.1rem',
+                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                                '&:hover': {
+                                    backgroundColor: 'grey.100',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.3)',
+                                }
+                            }}
+                            onClick={() => {
+                                document.getElementById('features-section')?.scrollIntoView({ 
+                                    behavior: 'smooth' 
+                                });
+                            }}
+                        >
+                            Explore Features
+                        </Button>
+                    </Container>
+                </Box>
+            </Fade>
 
             {/* Features Section */}
-            <Container maxWidth="lg" sx={{ mb: 8, py: 6 }}>
-                <Typography 
-                    variant="h2" 
-                    component="h2" 
-                    textAlign="center" 
-                    gutterBottom
-                    sx={{ mb: 6, fontWeight: 600, color: 'primary.main' }}
-                >
-                    Key Features
-                </Typography>
+            <Container maxWidth="lg" sx={{ mb: 6, py: 4 }} id="features-section">
+                <Fade in={isVisible} timeout={1200}>
+                    <Typography 
+                        variant="h2" 
+                        component="h2" 
+                        textAlign="center" 
+                        gutterBottom
+                        sx={{ mb: 4, fontWeight: 600, color: 'primary.main' }}
+                    >
+                        Key Features
+                    </Typography>
+                </Fade>
                 
-                <Grid container spacing={5}>
+                <Grid container spacing={4}>
                     {features.map((feature, index) => (
                         <Grid item xs={12} md={6} key={index}>
-                            <Card 
-                                sx={{ 
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'translateY(-10px)',
-                                        boxShadow: '0 15px 25px rgba(0,0,0,0.15)'
-                                    }
-                                }}
-                            >
-                                <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 5 }}>
-                                    <Box sx={{ color: 'primary.main', mb: 3 }}>
-                                        {feature.icon}
-                                    </Box>
-                                    <Typography variant="h4" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                                        {feature.title}
-                                    </Typography>
-                                    <Typography variant="h6" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                                        {feature.description}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
+                            <Fade in={isVisible} timeout={1400 + index * 200}>
+                                <Card 
+                                    sx={{ 
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
+                                        }
+                                    }}
+                                >
+                                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            mb: 2,
+                                            color: 'primary.main' 
+                                        }}>
+                                            {feature.icon}
+                                            <Typography variant="h5" component="h3" sx={{ ml: 2, fontWeight: 600 }}>
+                                                {feature.title}
+                                            </Typography>
+                                        </Box>
+                                        <Typography 
+                                            variant="body1" 
+                                            color="text.secondary" 
+                                            sx={{ lineHeight: 1.6 }}
+                                        >
+                                            {feature.description}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Fade>
                         </Grid>
                     ))}
                 </Grid>
             </Container>
 
-            {/* Images Gallery Section */}
-            {/* <Box sx={{ bgcolor: 'grey.50', py: 8, borderRadius: 3, mb: 4 }}>
-                <Container maxWidth="lg">
-                    <Typography 
-                        variant="h3" 
-                        component="h2" 
-                        textAlign="center" 
-                        gutterBottom
-                        sx={{ mb: 5, fontWeight: 600, color: 'primary.main' }}
-                    >
-                        System Overview
-                    </Typography>
-                    
-                    <Grid container spacing={4}>
-                        {[
-                            { img: shoppingImage, title: "Shopping Experience" },
-                            { img: couponSystemOnline, title: "Online System" },
-                            { img: couponImage2, title: "Coupon Management" }
-                        ].map((item, index) => (
-                            <Grid item xs={12} md={4} key={index}>
-                                <Card sx={{ 
-                                    overflow: 'hidden',
-                                    transition: 'transform 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'scale(1.05)'
-                                    }
-                                }}>
-                                    <CardMedia
-                                        component="img"
-                                        height="200"
-                                        image={item.img}
-                                        alt={item.title}
-                                        sx={{ objectFit: 'cover' }}
-                                    />
-                                    <CardContent>
-                                        <Typography variant="h6" component="h3" textAlign="center" sx={{ fontWeight: 600 }}>
-                                            {item.title}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Container>
-            </Box> */}
+            {/* Call to Action */}
+            <Container maxWidth="md" sx={{ mb: 6, textAlign: 'center' }}>
+                <Fade in={isVisible} timeout={1800}>
+                    <Card sx={{ 
+                        p: 4, 
+                        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+                    }}>
+                        <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                            Ready to Get Started?
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                            Join our platform for seamless coupon management designed for optimal user experience.
+                        </Typography>
+                    </Card>
+                </Fade>
+            </Container>
 
-            {/* System Description */}
-            {/* <Container maxWidth="md">
-                <Card sx={{ p: 4, bgcolor: 'background.paper', boxShadow: 3 }}>
-                    <Typography variant="h4" component="h2" gutterBottom textAlign="center" sx={{ fontWeight: 600, color: 'primary.main', mb: 3 }}>
-                        How It Works
-                    </Typography>
-                    <Typography 
-                        variant="body1" 
-                        paragraph
-                        sx={{ 
-                            lineHeight: 1.8,
-                            textAlign: 'justify',
-                            fontSize: '1.1rem',
-                            color: 'text.secondary'
-                        }}
-                    >
-                        Our Coupon System allows companies to create coupons as part of their promotional and marketing campaigns.
-                        The system also has registered customers who can purchase coupons, which are limited in quantity and validity.
-                        Each customer is limited to one coupon per type, and the system keeps track of purchased coupons for each customer.
-                        The system generates revenue from customer coupon purchases and the creation and updating of new coupons by companies.
-                    </Typography>
-                </Card>
-            </Container> */}
+            {/* Scroll to top button */}
+            <ScrollTop />
         </Box>
     );
 }

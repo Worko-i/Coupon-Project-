@@ -1,6 +1,6 @@
 package com.example.CouponProject.coupon;
 
-import com.example.CouponProject.category.Category;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.company.Company;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,8 +18,7 @@ public class CouponDTO {
     private int amount;
     private double price;
     private String image;
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Category category;
+    private CategoryType category;
 
     @JsonIgnore
     private Company company;

@@ -12,6 +12,7 @@ import com.example.CouponProject.coupon.CouponService;
 import com.example.CouponProject.customer.Customer;
 import com.example.CouponProject.customer.CustomerDTO;
 import com.example.CouponProject.customer.CustomerService;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.enums.ErrorMessage;
 import com.example.CouponProject.exception.AuthorizationException;
 import com.example.CouponProject.exception.CouponException;
@@ -94,10 +95,13 @@ public class CustomerCouponServiceImpl implements CustomerCouponService{
         return this.customerCouponRepository.findByCustomerId(customerId).stream().map(CustomerCoupon::getCoupon).collect(Collectors.toList());
     }
 
-    // the function receives an id of a customer and an id of a category and returns all the customer's coupons with the category id from the database.
-    public List<Coupon> getAllCouponsByCustomerIdAndCategoryId(int customerId, int categoryId) throws AuthorizationException {
+    // the function receives an id of a customer and a category and returns all the customer's coupons with the category from the database.
+    public List<Coupon> getAllCouponsByCustomerIdAndCategory(int customerId, CategoryType category) throws AuthorizationException {
         this.validateClient.validateUserIsCustomer(customerId);
-        return this.customerCouponRepository.findAllByCustomerIdAndCategoryId(customerId, categoryId).stream().map(CustomerCoupon::getCoupon).collect(Collectors.toList());
+        return this.customerCouponRepository.findByCustomerId(customerId).stream()
+                .map(CustomerCoupon::getCoupon)
+                .filter(coupon -> coupon.getCategory().equals(category))
+                .collect(Collectors.toList());
     }
 
     // the function receives an id of a customer and max price and returns all the customer's coupons with the price equal or lower from the database.

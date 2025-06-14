@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import com.example.CouponProject.category.Category;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.company.CompanyService;
 import com.example.CouponProject.enums.ErrorMessage;
 import com.example.CouponProject.exception.AuthorizationException;
@@ -115,7 +115,7 @@ public class CouponServiceImpl implements CouponService{
         The function receives a category and returns all coupons in the database with this category, from the table: coupons.
     */
     @Override
-    public List<CouponDTO> getCouponsByCategory(Category category) throws AuthorizationException {
+    public List<CouponDTO> getCouponsByCategory(CategoryType category) throws AuthorizationException {
         this.validateClient.validateUserIsCustomer();
         return this.couponRepository.findAllByCategory(category).stream().map(coupon -> this.modelMapper.map(coupon, CouponDTO.class)).collect(Collectors.toList());
     }
@@ -148,12 +148,12 @@ public class CouponServiceImpl implements CouponService{
     }
 
     /*
-        The function returns all coupons with the company id and category id, from the database, from the table: coupons.
+        The function returns all coupons with the company id and category, from the database, from the table: coupons.
     */
     @Override
-    public List<CouponDTO> getAllCouponsByCompanyIdAndCategoryId(int companyId, int categoryId) throws AuthorizationException {
+    public List<CouponDTO> getAllCouponsByCompanyIdAndCategory(int companyId, CategoryType category) throws AuthorizationException {
         this.validateClient.validateUserIsCompany(companyId);
-        return this.couponRepository.findAllByCompanyIdAndCategoryId(companyId, categoryId).stream().map(coupon -> this.modelMapper.map(coupon, CouponDTO.class)).collect(Collectors.toList());
+        return this.couponRepository.findAllByCompanyIdAndCategory(companyId, category).stream().map(coupon -> this.modelMapper.map(coupon, CouponDTO.class)).collect(Collectors.toList());
     }
 
     /*

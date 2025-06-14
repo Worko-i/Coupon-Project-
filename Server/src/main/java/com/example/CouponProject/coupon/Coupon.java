@@ -1,6 +1,6 @@
 package com.example.CouponProject.coupon;
 
-import com.example.CouponProject.category.Category;
+import com.example.CouponProject.enums.CategoryType;
 import com.example.CouponProject.company.Company;
 import com.example.CouponProject.customersCoupons.CustomerCoupon;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -49,9 +49,9 @@ public class Coupon {
     @ToString.Exclude
     private Company company;
 
-    @ManyToOne()
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 20)
+    private CategoryType category;
 
     @OneToMany(mappedBy = "coupon", cascade = {CascadeType.REMOVE})
     @ToString.Exclude

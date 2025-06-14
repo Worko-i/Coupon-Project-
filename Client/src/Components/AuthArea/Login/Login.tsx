@@ -15,7 +15,7 @@ import {
     Fade,
     Zoom
 } from '@mui/material';
-import { Login as LoginIcon, LocalOffer } from '@mui/icons-material';
+import { Login as LoginIcon, LocalOffer, AdminPanelSettings, Business, Person } from '@mui/icons-material';
 import LoginModel from '../../../Models/LoginModel';
 import authService from '../../../Services/AuthService';
 import { authStore } from '../../../Redux/AuthState';
@@ -39,16 +39,28 @@ function Login(): JSX.Element{
     return(
         <Box
             sx={{
-                minHeight: '80vh',
+                minHeight: '100vh',
+                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                py: 4
+                py: 4,
+                overflow: 'hidden',
             }}
         >
-            <Container maxWidth="sm">
+            <Container maxWidth="sm" sx={{ px: 3 }}>
                 <Fade in timeout={800}>
-                    <Card elevation={10} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                    <Card 
+                        elevation={12} 
+                        sx={{ 
+                            borderRadius: 4, 
+                            overflow: 'hidden',
+                            maxWidth: '480px',
+                            margin: '0 auto',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                    >
                         {/* Header */}
                         <Box
                             sx={{
