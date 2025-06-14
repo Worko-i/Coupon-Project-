@@ -11,8 +11,9 @@ class CustomerService {
         tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
         const response = await axios.post<CustomerModel>(appConfig.apiAddress + "admin/customer", customer,
         {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
-        customerStore.dispatch({type:CustomerActionType.AddCustomer, payload:response.data});
-        return response.data
+        const savedCustomer = response.data;
+        customerStore.dispatch({type:CustomerActionType.AddCustomer, payload:savedCustomer});
+        return savedCustomer;
     }
 
     async deleteCustomer(id: number): Promise<void>  {

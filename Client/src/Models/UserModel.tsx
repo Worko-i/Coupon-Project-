@@ -1,12 +1,13 @@
 interface UserModel{
-    id: number;
+    id?: number;
     email: string;
-    password: string;
+    password?: string;
     clientType: string;
-    name: string;
-    firstName: string;
-    lastName: string;
-    
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    exp?: number;    // JWT expiration timestamp
+    iat?: number;    // JWT issued at timestamp
 }
 
 export default UserModel;

@@ -38,16 +38,16 @@ function Login(): JSX.Element{
 
     return(
         <Box
-            sx={{
-                minHeight: '90vh',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                py: 2,
-                overflow: 'hidden',
-            }}
+            // sx={{
+            //     minHeight: '90vh',
+            //     width: '100%',
+            //     display: 'flex',
+            //     alignItems: 'center',
+            //     justifyContent: 'center',
+            //     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            //     py: 2,
+            //     overflow: 'hidden',
+            // }}
         >
             <Container maxWidth="sm" sx={{ px: 3 }}>
                 <Fade in timeout={800}>
@@ -72,7 +72,6 @@ function Login(): JSX.Element{
                         >
                             <Zoom in timeout={1000}>
                                 <Box>
-                                    <LocalOffer sx={{ fontSize: 36, mb: 1 }} />
                                     <Typography variant="h5" component="h1" sx={{ fontWeight: 600 }}>
                                         Sign In
                                     </Typography>

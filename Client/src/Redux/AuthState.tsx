@@ -48,24 +48,31 @@ export function logoutAction(): AuthAction{
 //5
 export function authReducer(currentState: AuthState = new AuthState, action: AuthAction): AuthState{
     const newState: AuthState = {...currentState};
-    
+
     switch(action.type){
         case AuthActionType.Login:
-            newState.token = action.payload.token;
-            newState.exp = action.payload.exp;
-            const userFromToken: UserModel = jwtDecode(newState.token!);
-            newState.user = userFromToken;
-            localStorage.setItem("token", newState.token!);
+            const tokenData: TokenModel = action.payload;
+            newState.token = tokenData.token;
+            
+            if(tokenData.token) {
+                const decodedToken: any = jwtDecode(tokenData.token);
+                newState.user = {
+                    email: decodedToken.email,
+                    clientType: decodedToken.clientType,
+                    exp: decodedToken.exp,
+                    iat: decodedToken.iat
+                };
+                newState.exp = tokenData.exp;  // Store the expiration from the server response
+                localStorage.setItem("token", tokenData.token);
+            }
             break;
-
-
+        
         case AuthActionType.Logout:
             newState.token = null;
             newState.user = null;
             newState.exp = null;
             localStorage.removeItem("token");
             break;
-
     }
     return newState;
 }

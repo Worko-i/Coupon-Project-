@@ -20,6 +20,7 @@ import com.example.CouponProject.login.ClientTypeLoggedIn;
 import com.example.CouponProject.token.TokenService;
 import com.example.CouponProject.user.UserService;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.modelmapper.ModelMapper;
@@ -59,9 +60,12 @@ public class AuthService {
         try {
             System.out.println("Processing login request for: " + loginRequestDTO.getEmail() + " with client type: " + loginRequestDTO.getClientType());
             
-            // Special direct handling for admin - bypass the authentication manager completely
-            if (loginRequestDTO.getEmail().equals("admin@admin.com") && 
-                loginRequestDTO.getClientType() == com.example.CouponProject.enums.ClientType.ADMIN) {
+            // Early validation for admin - must use correct client type
+            if (loginRequestDTO.getEmail().equals("admin@admin.com")) {
+                if (loginRequestDTO.getClientType() != ClientType.ADMIN) {
+                    System.out.println("Attempted to login as admin with incorrect client type: " + loginRequestDTO.getClientType());
+                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+                }
                 
                 try {
                     // Direct password validation for admin
@@ -77,20 +81,46 @@ public class AuthService {
                         
                         // Generate token for admin
                         String token = this.tokenService.generateToken(adminClaims);
-                        long expirationTime = this.tokenService.getExpirationFromToken(token).getTime();
-                        System.out.println("Admin login successful");
-                        return TokenResponseDTO.builder().token(token).expiration(expirationTime).build();
+                        Date expirationDate = this.tokenService.getExpirationFromToken(token);
+                        return TokenResponseDTO.builder()
+                            .token(token)
+                            .expiration(expirationDate.getTime())
+                            .build();
                     } else {
                         System.out.println("Admin login failed: incorrect password");
                         throw new AuthorizationException(ErrorMessage.PASSWORD_NOT_FOUND);
                     }
                 } catch (AuthorizationException e) {
-                    throw e; // Re-throw authorization exceptions
+                    throw e;
                 } catch (Exception e) {
-                    // Log the specific error for debugging
                     System.err.println("Unexpected error during admin authentication: " + e.toString());
                     e.printStackTrace();
                     throw new AuthorizationException(ErrorMessage.AUTHENTICATION_ERROR);
+                }
+            }
+            
+            // Early validation for non-admin users trying to use admin email
+            if (loginRequestDTO.getEmail().equals("admin@admin.com")) {
+                throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+            }
+            
+            // Validate user type matches client type before standard authentication
+            UserDetails userDetails = this.userService.loadUserByUsername(loginRequestDTO.getEmail());
+            if (userDetails == null) {
+                throw new AuthorizationException(ErrorMessage.EMAIL_NOT_FOUND);
+            }
+
+            // Check if trying to log in as COMPANY
+            if (loginRequestDTO.getClientType() == ClientType.COMPANY) {
+                if (!(userDetails instanceof CompanyDTO) && !(userDetails instanceof Company)) {
+                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+                }
+            }
+
+            // Check if trying to log in as CUSTOMER
+            if (loginRequestDTO.getClientType() == ClientType.CUSTOMER) {
+                if (!(userDetails instanceof CustomerDTO) && !(userDetails instanceof Customer)) {
+                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
                 }
             }
             
@@ -98,11 +128,6 @@ public class AuthService {
             boolean isLoginDetailsValid = this.isLoginDetailsValid(loginRequestDTO);
             
             if (isLoginDetailsValid) {
-                UserDetails userDetails = this.userService.loadUserByUsername(loginRequestDTO.getEmail());
-                if (userDetails == null) {
-                    throw new AuthorizationException(ErrorMessage.EMAIL_NOT_FOUND);
-                }
-                
                 Map<String, Object> claims;
                 
                 switch (loginRequestDTO.getClientType()) {
@@ -181,8 +206,11 @@ public class AuthService {
 
                 claims.put("clientType", loginRequestDTO.getClientType());
                 String token = this.tokenService.generateToken(claims);
-                long expirationTime = this.tokenService.getExpirationFromToken(token).getTime();
-                return TokenResponseDTO.builder().token(token).expiration(expirationTime).build();
+                Date expirationDate = this.tokenService.getExpirationFromToken(token);
+                return TokenResponseDTO.builder()
+                    .token(token)
+                    .expiration(expirationDate.getTime())
+                    .build();
             }
             else {
                 if (this.userService.loadUserByUsername(loginRequestDTO.getEmail()) == null){

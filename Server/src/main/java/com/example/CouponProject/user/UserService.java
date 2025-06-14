@@ -66,12 +66,12 @@ public class UserService implements UserDetailsService {
         try {
             // Check for admin user first
             if (username.equals("admin@admin.com")) {
-                // Use the stored hash instead of generating a new one each time
+                // If it's an admin email, we'll validate the client type in AuthService
                 return new User("admin@admin.com", adminPasswordHash, 
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
             }
             
-            // Try to find the user as a company
+            // For non-admin users, try to find them as a company
             try {
                 UserDetails companyDetails = this.companyService.findByEmail(username);
                 if (companyDetails != null) {
@@ -94,8 +94,7 @@ public class UserService implements UserDetailsService {
             // If we get here, no valid user was found
             throw new AuthorizationException(ErrorMessage.EMAIL_NOT_FOUND);
         } catch (AuthorizationException e) {
-            // Rethrow authorization exceptions
-            throw e;
+            throw e; // Re-throw authorization exceptions
         } catch (Exception e) {
             // Log unexpected errors and convert to authorization exception
             System.err.println("Unexpected error in loadUserByUsername: " + e.toString());

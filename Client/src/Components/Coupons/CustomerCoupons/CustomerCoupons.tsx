@@ -43,13 +43,14 @@ function CusotmerCoupons(): JSX.Element {
     };
 
     useEffect(() => {
-
+        // Load categories
         categoryService.getAllCategories().then((categoriesResponse) => {
         }).catch(error => {
             ErrorHandler.handleErrorResponse(error);
         });
 
-        customerCouponService.getCouponsByCustomer(authStore.getState().user?.id!).then((response) => {
+        // Load customer's coupons
+        customerCouponService.getCouponsByCustomer().then((response) => {
             setCouponsToShow(response);
             setTimeout(() => {
                 setLoading(false);

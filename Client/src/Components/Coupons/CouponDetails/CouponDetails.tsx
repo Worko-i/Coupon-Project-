@@ -14,7 +14,8 @@ import {
     DialogContentText,
     DialogActions,
     Fade,
-    Alert
+    Alert,
+    Tooltip
 } from '@mui/material';
 import { 
     Edit as EditIcon, 
@@ -24,7 +25,8 @@ import {
     AttachMoney as MoneyIcon,
     Inventory as InventoryIcon,
     CalendarToday as CalendarIcon,
-    AccessTime as TimeIcon
+    AccessTime as TimeIcon,
+    CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import CouponModel from '../../../Models/CouponModel';
 import { useEffect, useState } from 'react';
@@ -32,28 +34,48 @@ import couponService from '../../../Services/CouponService';
 import { authStore } from '../../../Redux/AuthState';
 import customerCouponService from '../../../Services/CustomerCouponService';
 import ErrorHandler from '../../HandleError/ErrorHandler';
+import jwtDecode from 'jwt-decode';
 
 
 function CouponDetails(): JSX.Element {
-
     const params = useParams();
     const navigator = useNavigate();
-    const couponId = +params.couponId!;
+    const couponId = params.couponId ? +params.couponId : 0;
     const [coupon, setCoupon] = useState<CouponModel>();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+    const [isAlreadyPurchased, setIsAlreadyPurchased] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [purchaseError, setPurchaseError] = useState<string>('');
+
+    const currentUser = authStore.getState().user;
+    const isCustomer = currentUser?.clientType === "CUSTOMER";
 
     useEffect(() => {
-        couponService.getSingleCoupon(couponId).then((response) => {
-            setCoupon(response);
-        }).catch(error => {
-            ErrorHandler.handleErrorResponse(error);
-        });
-    }, []);
+        const fetchData = async () => {
+            try {
+                const couponResponse = await couponService.getSingleCoupon(couponId);
+                setCoupon(couponResponse);
+
+                // Check if customer has already purchased this coupon
+                if (isCustomer) {
+                    const customerCoupons = await customerCouponService.getCouponsByCustomer();
+                    const purchased = customerCoupons.some(c => c.id === couponId);
+                    setIsAlreadyPurchased(purchased);
+                }
+            } catch (error) {
+                ErrorHandler.handleErrorResponse(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [couponId, isCustomer]);
 
     function deleteCoupon() {
-        couponService.deleteCoupon(couponId).then((response) => {
-            navigator('/coupons')
+        couponService.deleteCoupon(couponId).then(() => {
+            navigator('/coupons');
         }).catch(error => {
             ErrorHandler.handleErrorResponse(error);
         });
@@ -61,8 +83,9 @@ function CouponDetails(): JSX.Element {
     }
 
     function buyCoupon() {
-        customerCouponService.purchaseCoupon(authStore.getState().user!.id, couponId).then(response => {
-            navigator('/customer/coupons')
+        customerCouponService.purchaseCoupon(couponId).then(() => {
+            setIsAlreadyPurchased(true);
+            navigator('/customer/coupons');
         }).catch(error => {
             ErrorHandler.handleErrorResponse(error);
         });
@@ -76,6 +99,14 @@ function CouponDetails(): JSX.Element {
 
     const isExpired = coupon && new Date(coupon.endDate) < new Date();
     const isOutOfStock = coupon && coupon.amount <= 0;
+
+    if (loading) {
+        return (
+            <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+                <Typography>Loading...</Typography>
+            </Container>
+        );
+    }
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -101,14 +132,47 @@ function CouponDetails(): JSX.Element {
                         </Typography>
 
                         {/* Status Alerts */}
+                        {isAlreadyPurchased && isCustomer && (
+                            <Alert 
+                                severity="info" 
+                                sx={{ 
+                                    mb: 3,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    background: 'rgba(25, 118, 210, 0.08)',
+                                    '& .MuiAlert-icon': {
+                                        color: 'primary.main'
+                                    }
+                                }}
+                                icon={<CheckCircleIcon />}
+                            >
+                                You have already purchased this coupon. Check your coupons page to view it.
+                            </Alert>
+                        )}
                         {isExpired && (
-                            <Alert severity="error" sx={{ mb: 3 }}>
-                                This coupon has expired
+                            <Alert 
+                                severity="error" 
+                                sx={{ 
+                                    mb: 3,
+                                    '& .MuiAlert-icon': {
+                                        color: 'error.main'
+                                    }
+                                }}
+                            >
+                                This coupon has expired and is no longer available for purchase
                             </Alert>
                         )}
                         {isOutOfStock && (
-                            <Alert severity="warning" sx={{ mb: 3 }}>
-                                This coupon is out of stock
+                            <Alert 
+                                severity="warning" 
+                                sx={{ 
+                                    mb: 3,
+                                    '& .MuiAlert-icon': {
+                                        color: 'warning.main'
+                                    }
+                                }}
+                            >
+                                This coupon is currently out of stock
                             </Alert>
                         )}
 
@@ -256,10 +320,10 @@ function CouponDetails(): JSX.Element {
                                                     color="success"
                                                     startIcon={<ShoppingCartIcon />}
                                                     onClick={() => setBuyDialogOpen(true)}
-                                                    disabled={isExpired || isOutOfStock}
+                                                    disabled={isExpired || isOutOfStock || isAlreadyPurchased}
                                                     fullWidth
                                                     sx={{
-                                                        background: !isExpired && !isOutOfStock 
+                                                        background: !isExpired && !isOutOfStock && !isAlreadyPurchased
                                                             ? 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)' 
                                                             : undefined,
                                                         py: 1.5,
@@ -268,7 +332,7 @@ function CouponDetails(): JSX.Element {
                                                         fontSize: '1.1rem'
                                                     }}
                                                 >
-                                                    {isExpired ? 'Expired' : isOutOfStock ? 'Out of Stock' : 'Buy Coupon'}
+                                                    {isExpired ? 'Expired' : isOutOfStock ? 'Out of Stock' : isAlreadyPurchased ? 'Already Purchased' : 'Buy Coupon'}
                                                 </Button>
                                             )}
                                         </Box>
@@ -303,22 +367,64 @@ function CouponDetails(): JSX.Element {
                         {/* Buy Confirmation Dialog */}
                         <Dialog
                             open={buyDialogOpen}
-                            onClose={() => setBuyDialogOpen(false)}
+                            onClose={() => {
+                                setBuyDialogOpen(false);
+                                setPurchaseError('');
+                            }}
                             maxWidth="sm"
                             fullWidth
                         >
-                            <DialogTitle>Confirm Purchase</DialogTitle>
+                            <DialogTitle sx={{ pb: 1 }}>
+                                Confirm Purchase
+                            </DialogTitle>
                             <DialogContent>
-                                <DialogContentText>
-                                    Are you sure you want to buy this coupon for ${coupon.price}?
+                                <DialogContentText sx={{ mb: 2 }}>
+                                    Are you sure you want to purchase this coupon for ${coupon.price}?
                                 </DialogContentText>
+                                {purchaseError && (
+                                    <Alert 
+                                        severity="error" 
+                                        sx={{ 
+                                            mt: 2,
+                                            '& .MuiAlert-icon': {
+                                                color: 'error.main'
+                                            }
+                                        }}
+                                    >
+                                        {purchaseError}
+                                    </Alert>
+                                )}
+                                {isAlreadyPurchased && (
+                                    <Alert 
+                                        severity="warning" 
+                                        sx={{ 
+                                            mt: 2,
+                                            '& .MuiAlert-icon': {
+                                                color: 'warning.main'
+                                            }
+                                        }}
+                                    >
+                                        You have already purchased this coupon
+                                    </Alert>
+                                )}
                             </DialogContent>
                             <DialogActions sx={{ p: 3, gap: 1 }}>
-                                <Button onClick={() => setBuyDialogOpen(false)} variant="outlined">
+                                <Button 
+                                    onClick={() => {
+                                        setBuyDialogOpen(false);
+                                        setPurchaseError('');
+                                    }} 
+                                    variant="outlined"
+                                >
                                     Cancel
                                 </Button>
-                                <Button onClick={buyCoupon} variant="contained" color="success">
-                                    Buy Now
+                                <Button 
+                                    onClick={buyCoupon} 
+                                    variant="contained" 
+                                    color="success"
+                                    disabled={isAlreadyPurchased}
+                                >
+                                    {isAlreadyPurchased ? 'Already Purchased' : 'Buy Now'}
                                 </Button>
                             </DialogActions>
                         </Dialog>

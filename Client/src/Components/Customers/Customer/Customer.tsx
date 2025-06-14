@@ -4,6 +4,7 @@ import customerService from '../../../Services/CustomerService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ErrorHandler from '../../HandleError/ErrorHandler';
+import { authStore } from '../../../Redux/AuthState';
 import {
     Container,
     Paper,
@@ -13,8 +14,7 @@ import {
     Box,
     Alert,
     CircularProgress,
-    Fade,
-    Grid
+    Fade
 } from '@mui/material';
 import { PersonAdd, Save, Edit } from '@mui/icons-material';
 
@@ -27,6 +27,7 @@ function Customer(): JSX.Element {
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     const isEditMode = !!params.customerId;
+    const isAdmin = authStore.getState().user?.clientType === "ADMIN";
 
     useEffect(() => {
         if (params.customerId) {
@@ -51,13 +52,20 @@ function Customer(): JSX.Element {
         setSuccessMessage('');
 
         if (isEditMode && params.customerId) {
-            customer.id = +params.customerId;
-            customerService.updateCustomer(customer.id, customer)
+            const customerId = +params.customerId;
+            customer.id = customerId;
+            customerService.updateCustomer(customerId, customer)
                 .then(() => {
                     setSuccessMessage("Customer has been updated successfully!");
-                    setTimeout(() => {
-                        navigate('/customer-details/' + customer.id);
-                    }, 1500);
+                    if (isAdmin && customerId) {
+                        setTimeout(() => {
+                            navigate(`/customer-details/${customerId}`);
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            navigate("/customers");
+                        }, 1500);
+                    }
                 })
                 .catch(error => {
                     ErrorHandler.handleErrorResponse(error);
@@ -66,11 +74,17 @@ function Customer(): JSX.Element {
                 .finally(() => setLoading(false));
         } else {
             customerService.addCustomer(customer)
-                .then(() => {
+                .then((savedCustomer) => {
                     setSuccessMessage("Customer has been added successfully!");
-                    setTimeout(() => {
-                        navigate("/customers");
-                    }, 1500);
+                    if (isAdmin && savedCustomer && savedCustomer.id) {
+                        setTimeout(() => {
+                            navigate(`/customer-details/${savedCustomer.id}`);
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            navigate("/customers");
+                        }, 1500);
+                    }
                 })
                 .catch(error => {
                     ErrorHandler.handleErrorResponse(error);
@@ -266,6 +280,39 @@ function Customer(): JSX.Element {
                                         }
                                     }}
                                 />
+
+                                {!isEditMode && (
+                                    <TextField
+                                        fullWidth
+                                        type="password"
+                                        label="Password"
+                                        variant="outlined"
+                                        placeholder="Enter password"
+                                        {...register("password", {
+                                            required: { value: true, message: "Password is required" },
+                                            minLength: { value: 4, message: "Password must be at least 4 characters" }
+                                        })}
+                                        error={!!formState.errors.password}
+                                        helperText={formState.errors.password?.message}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                backgroundColor: 'white',
+                                                borderRadius: 2,
+                                                '& fieldset': { 
+                                                    borderColor: 'rgba(25, 118, 210, 0.2)',
+                                                    borderWidth: 2
+                                                },
+                                                '&:hover fieldset': { 
+                                                    borderColor: 'rgba(25, 118, 210, 0.5)' 
+                                                },
+                                                '&.Mui-focused fieldset': { 
+                                                    borderColor: '#1976d2',
+                                                    borderWidth: 2
+                                                }
+                                            }
+                                        }}
+                                    />
+                                )}
 
                                 <Button
                                     type="submit"

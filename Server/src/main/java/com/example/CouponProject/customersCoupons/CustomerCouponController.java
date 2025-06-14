@@ -1,12 +1,14 @@
 package com.example.CouponProject.customersCoupons;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.CouponProject.coupon.Coupon;
 import com.example.CouponProject.coupon.CouponService;
 import com.example.CouponProject.customer.CustomerDTO;
 import com.example.CouponProject.enums.CategoryType;
+import com.example.CouponProject.enums.ErrorMessage;
 import com.example.CouponProject.exception.AuthorizationException;
 import com.example.CouponProject.exception.CouponException;
 import com.example.CouponProject.exception.CustomerCouponException;
@@ -29,17 +31,75 @@ public class CustomerCouponController {
     private final TokenService tokenService;
 
     @PostMapping("/company/customer_coupon/{customerId}/{couponId}")
-    public CustomerCoupon addPurchase(@PathVariable int customerId, @PathVariable int couponId, HttpServletRequest request) throws CustomerException, CouponException, CustomerCouponException, AuthorizationException {
-        // Validate that the logged-in customer matches the customerId in the URL
-        this.validateClient.validateUserIsCustomer(customerId);
-        
-        // Extract customer information from JWT token instead of calling getSingleCustomer (which requires admin privileges)
-        String token = extractTokenFromRequest(request);
-        CustomerDTO customerDTO = createCustomerDTOFromToken(token);
-        
-        return this.customerCouponService.addPurchase(this.couponService.getSingleCoupon(couponId), customerDTO);
+    public ResponseEntity<?> addPurchase(
+            @PathVariable int customerId, 
+            @PathVariable int couponId, 
+            HttpServletRequest request
+    ) throws CustomerException, CouponException, CustomerCouponException, AuthorizationException {
+        try {
+            // Validate that the logged-in customer matches the customerId in the URL
+            this.validateClient.validateUserIsCustomer(customerId);
+            
+            String token = extractTokenFromRequest(request);
+            CustomerDTO customerDTO = createCustomerDTOFromToken(token);
+            
+            // Verify the token customer ID matches the path parameter
+            if (customerDTO.getId() != customerId) {
+                throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+            }
+
+            CustomerCoupon purchase = this.customerCouponService.addPurchase(
+                this.couponService.getSingleCoupon(couponId), 
+                customerDTO
+            );
+            
+            return ResponseEntity.ok(purchase);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-    
+
+    @DeleteMapping("/company/customer_coupon/{id}")
+    public void deletePurchase(@PathVariable int id) throws CustomerCouponException {
+        this.customerCouponService.deletePurchase(id);
+    }
+    @GetMapping("/company/customer_coupon/{id}")
+    public CustomerCoupon getSinglePurchase(@PathVariable int id) throws CustomerCouponException {
+        return this.customerCouponService.getSinglePurchase(id);
+    }
+
+    @GetMapping("/company/customer_coupon/byCustomer/{customerId}")
+    public ResponseEntity<?> getAllCouponsPurchasedByCustomerId(
+            @PathVariable int customerId,
+            HttpServletRequest request
+    ) throws AuthorizationException {
+        try {
+            // Validate that the logged-in customer matches the customerId
+            this.validateClient.validateUserIsCustomer(customerId);
+            
+            String token = extractTokenFromRequest(request);
+            CustomerDTO customerDTO = createCustomerDTOFromToken(token);
+            
+            // Verify the token customer ID matches the path parameter
+            if (customerDTO.getId() != customerId) {
+                throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+            }
+
+            List<Coupon> coupons = this.customerCouponService.getAllCouponsPurchasedByCustomerId(customerId);
+            return ResponseEntity.ok(coupons);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/company/customer_coupon/byCustomerAndCategory/{customerId}/{category}")
+    public List<Coupon> getAllCouponsByCustomerIdAndCategory(@PathVariable int customerId, @PathVariable CategoryType category) throws AuthorizationException {
+        return this.customerCouponService.getAllCouponsByCustomerIdAndCategory(customerId, category);
+    }
+    @GetMapping("/company/customer_coupon/byCustomerAndMaxPrice/{customerId}/{maxPrice}")
+    public List<Coupon> getAllCouponsByCustomerIdAndMaxPrice(@PathVariable int customerId, @PathVariable double maxPrice) throws AuthorizationException {
+        return this.customerCouponService.getAllCouponsByCustomerIdAndMaxPrice(customerId, maxPrice);
+    }
+
     private String extractTokenFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -79,28 +139,6 @@ public class CustomerCouponController {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    @DeleteMapping("/company/customer_coupon/{id}")
-    public void deletePurchase(@PathVariable int id) throws CustomerCouponException {
-        this.customerCouponService.deletePurchase(id);
-    }
-    @GetMapping("/company/customer_coupon/{id}")
-    public CustomerCoupon getSinglePurchase(@PathVariable int id) throws CustomerCouponException {
-        return this.customerCouponService.getSinglePurchase(id);
-    }
-
-    @GetMapping("/company/customer_coupon/byCustomer/{customerId}")
-    public List<Coupon> getAllCouponsPurchasedByCustomerId(@PathVariable int customerId) throws AuthorizationException {
-        return this.customerCouponService.getAllCouponsPurchasedByCustomerId(customerId);
-    }
-    @GetMapping("/company/customer_coupon/byCustomerAndCategory/{customerId}/{category}")
-    public List<Coupon> getAllCouponsByCustomerIdAndCategory(@PathVariable int customerId, @PathVariable CategoryType category) throws AuthorizationException {
-        return this.customerCouponService.getAllCouponsByCustomerIdAndCategory(customerId, category);
-    }
-    @GetMapping("/company/customer_coupon/byCustomerAndMaxPrice/{customerId}/{maxPrice}")
-    public List<Coupon> getAllCouponsByCustomerIdAndMaxPrice(@PathVariable int customerId, @PathVariable double maxPrice) throws AuthorizationException {
-        return this.customerCouponService.getAllCouponsByCustomerIdAndMaxPrice(customerId, maxPrice);
     }
 
 }
