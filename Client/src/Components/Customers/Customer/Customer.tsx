@@ -81,192 +81,226 @@ function Customer(): JSX.Element {
     }
 
     return (
-        <Container maxWidth="sm" sx={{ py: 4 }}>
-            <Fade in timeout={600}>
-                <Paper
-                    elevation={8}
-                    sx={{
-                        p: 4,
-                        borderRadius: 3,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        '&::before': {
-                            content: '""',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            backdropFilter: 'blur(10px)',
-                            zIndex: 0,
-                        }
-                    }}
-                >
-                    <Box sx={{ position: 'relative', zIndex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-                            {isEditMode ? <Edit sx={{ fontSize: 40, color: 'white' }} /> : 
-                                         <PersonAdd sx={{ fontSize: 40, color: 'white' }} />}
-                            <Typography variant="h4" component="h1" fontWeight="bold">
-                                {isEditMode ? 'Edit Customer' : 'Add Customer'}
+        <Container maxWidth="md" sx={{ py: 6 }}>
+            <Fade in timeout={800}>
+                <Box>
+                    {/* Enhanced Hero Section */}
+                    <Paper
+                        elevation={12}
+                        sx={{
+                            p: 6,
+                            mb: 4,
+                            borderRadius: 4,
+                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #e3f2fd 100%)',
+                            color: 'white',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                backdropFilter: 'blur(15px)',
+                                zIndex: 0,
+                            }
+                        }}
+                    >
+                        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                                <PersonAdd sx={{ fontSize: 60, color: 'white', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }} />
+                            </Box>
+                            <Typography variant="h3" component="h1" fontWeight={800} sx={{ mb: 2 }}>
+                                {isEditMode ? 'Edit Customer' : 'Add New Customer'}
+                            </Typography>
+                            <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 300 }}>
+                                {isEditMode ? 'Update customer information below' : 'Enter customer details to create a new account'}
                             </Typography>
                         </Box>
+                    </Paper>
 
-                        {successMessage && (
-                            <Alert severity="success" sx={{ mb: 2, '& .MuiAlert-message': { color: 'inherit' } }}>
-                                {successMessage}
-                            </Alert>
-                        )}
-
-                        {errorMessage && (
-                            <Alert severity="error" sx={{ mb: 2, '& .MuiAlert-message': { color: 'inherit' } }}>
-                                {errorMessage}
-                            </Alert>
-                        )}
-
-                        <Box
-                            component="form"
-                            onSubmit={handleSubmit(sendCustomer)}
-                            sx={{ '& .MuiTextField-root': { mb: 2 } }}
-                        >
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="First Name"
-                                        variant="outlined"
-                                        placeholder="Enter first name"
-                                        {...register("firstName", {
-                                            required: { value: true, message: "First name field is mandatory" }
-                                        })}
-                                        error={!!formState.errors.firstName}
-                                        helperText={formState.errors.firstName?.message}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                                                '&:hover fieldset': { borderColor: 'white' },
-                                                '&.Mui-focused fieldset': { borderColor: 'white' }
-                                            },
-                                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.8)' },
-                                            '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Last Name"
-                                        variant="outlined"
-                                        placeholder="Enter last name"
-                                        {...register("lastName", {
-                                            required: { value: true, message: "Last name field is mandatory" }
-                                        })}
-                                        error={!!formState.errors.lastName}
-                                        helperText={formState.errors.lastName?.message}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                                                '&:hover fieldset': { borderColor: 'white' },
-                                                '&.Mui-focused fieldset': { borderColor: 'white' }
-                                            },
-                                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.8)' },
-                                            '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
-
-                            <TextField
-                                fullWidth
-                                label="Email"
-                                type="email"
-                                variant="outlined"
-                                placeholder="Enter email address"
-                                {...register("email", {
-                                    required: { value: true, message: "Email field is mandatory" },
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: "Email is not valid"
-                                    }
-                                })}
-                                error={!!formState.errors.email}
-                                helperText={formState.errors.email?.message}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                                        '&:hover fieldset': { borderColor: 'white' },
-                                        '&.Mui-focused fieldset': { borderColor: 'white' }
-                                    },
-                                    '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.8)' },
-                                    '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
-                                }}
-                            />
-
-                            {!isEditMode && (
-                                <TextField
-                                    fullWidth
-                                    label="Password"
-                                    type="password"
-                                    variant="outlined"
-                                    placeholder="Enter password"
-                                    {...register("password", {
-                                        required: { value: true, message: "Password field is mandatory" }
-                                    })}
-                                    error={!!formState.errors.password}
-                                    helperText={formState.errors.password?.message}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                            '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                                            '&:hover fieldset': { borderColor: 'white' },
-                                            '&.Mui-focused fieldset': { borderColor: 'white' }
-                                        },
-                                        '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.8)' },
-                                        '& .MuiInputLabel-root.Mui-focused': { color: 'white' }
+                    {/* Form Section */}
+                    <Paper
+                        elevation={8}
+                        sx={{
+                            p: 5,
+                            borderRadius: 4,
+                            background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
+                            border: '1px solid rgba(25, 118, 210, 0.1)',
+                            position: 'relative',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: 'rgba(255, 255, 255, 0.8)',
+                                backdropFilter: 'blur(10px)',
+                                borderRadius: 4,
+                                zIndex: 0
+                            }
+                        }}
+                    >
+                        <Box sx={{ position: 'relative', zIndex: 1 }}>
+                            {successMessage && (
+                                <Alert 
+                                    severity="success" 
+                                    sx={{ 
+                                        mb: 3, 
+                                        borderRadius: 2,
+                                        '& .MuiAlert-message': { fontWeight: 600 }
                                     }}
-                                />
+                                >
+                                    {successMessage}
+                                </Alert>
                             )}
 
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                size="large"
-                                disabled={loading}
-                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : 
-                                         isEditMode ? <Edit /> : <Save />}
-                                sx={{
-                                    mt: 2,
-                                    py: 1.5,
-                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    fontSize: '1.1rem',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
-                                    },
-                                    '&:disabled': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        color: 'rgba(255, 255, 255, 0.7)'
-                                    },
-                                    transition: 'all 0.3s ease'
-                                }}
+                            {errorMessage && (
+                                <Alert 
+                                    severity="error" 
+                                    sx={{ 
+                                        mb: 3, 
+                                        borderRadius: 2,
+                                        '& .MuiAlert-message': { fontWeight: 600 }
+                                    }}
+                                >
+                                    {errorMessage}
+                                </Alert>
+                            )}
+
+                            <Box
+                                component="form"
+                                onSubmit={handleSubmit(sendCustomer)}
+                                sx={{ '& .MuiTextField-root': { mb: 3 } }}
                             >
-                                {loading ? 'Processing...' : 
-                                 isEditMode ? 'Update Customer' : 'Add Customer'}
-                            </Button>
+                                <TextField
+                                    fullWidth
+                                    label="First Name"
+                                    variant="outlined"
+                                    placeholder="Enter first name"
+                                    {...register("firstName", {
+                                        required: { value: true, message: "First name is required" }
+                                    })}
+                                    error={!!formState.errors.firstName}
+                                    helperText={formState.errors.firstName?.message}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'white',
+                                            borderRadius: 2,
+                                            '& fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.2)',
+                                                borderWidth: 2
+                                            },
+                                            '&:hover fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.5)' 
+                                            },
+                                            '&.Mui-focused fieldset': { 
+                                                borderColor: '#1976d2',
+                                                borderWidth: 2
+                                            }
+                                        }
+                                    }}
+                                />
+
+                                <TextField
+                                    fullWidth
+                                    label="Last Name"
+                                    variant="outlined"
+                                    placeholder="Enter last name"
+                                    {...register("lastName", {
+                                        required: { value: true, message: "Last name is required" }
+                                    })}
+                                    error={!!formState.errors.lastName}
+                                    helperText={formState.errors.lastName?.message}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'white',
+                                            borderRadius: 2,
+                                            '& fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.2)',
+                                                borderWidth: 2
+                                            },
+                                            '&:hover fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.5)' 
+                                            },
+                                            '&.Mui-focused fieldset': { 
+                                                borderColor: '#1976d2',
+                                                borderWidth: 2
+                                            }
+                                        }
+                                    }}
+                                />
+
+                                <TextField
+                                    fullWidth
+                                    label="Email"
+                                    variant="outlined"
+                                    placeholder="Enter email address"
+                                    {...register("email", {
+                                        required: { value: true, message: "Email is required" },
+                                        pattern: { 
+                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 
+                                            message: "Invalid email address" 
+                                        }
+                                    })}
+                                    error={!!formState.errors.email}
+                                    helperText={formState.errors.email?.message}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'white',
+                                            borderRadius: 2,
+                                            '& fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.2)',
+                                                borderWidth: 2
+                                            },
+                                            '&:hover fieldset': { 
+                                                borderColor: 'rgba(25, 118, 210, 0.5)' 
+                                            },
+                                            '&.Mui-focused fieldset': { 
+                                                borderColor: '#1976d2',
+                                                borderWidth: 2
+                                            }
+                                        }
+                                    }}
+                                />
+
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    disabled={loading}
+                                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : isEditMode ? <Edit /> : <Save />}
+                                    sx={{
+                                        mt: 4,
+                                        py: 2,
+                                        borderRadius: 3,
+                                        fontWeight: 700,
+                                        fontSize: '1.2rem',
+                                        textTransform: 'none',
+                                        background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                                        boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                                            transform: 'translateY(-3px)',
+                                            boxShadow: '0 10px 30px rgba(25, 118, 210, 0.4)'
+                                        },
+                                        '&:disabled': {
+                                            background: 'linear-gradient(45deg, #bdbdbd 30%, #e0e0e0 90%)',
+                                            color: 'rgba(255, 255, 255, 0.7)'
+                                        },
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }}
+                                >
+                                    {loading ? 'Processing...' : isEditMode ? 'Update Customer' : 'Add Customer'}
+                                </Button>
+                            </Box>
                         </Box>
-                    </Box>
-                </Paper>
+                    </Paper>
+                </Box>
             </Fade>
         </Container>
     );

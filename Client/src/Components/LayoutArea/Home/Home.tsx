@@ -63,14 +63,14 @@ function Home(): JSX.Element {
 
     const features = [
         {
-            icon: <LocalOffer sx={{ fontSize: 52 }} />,
-            title: "Create & Manage Coupons",
-            description: "Companies can easily create, update, and manage promotional coupons with advanced settings."
+            icon: <LocalOffer sx={{ fontSize: 40 }} />,
+            title: "Manage Coupons",
+            description: "Create and manage promotional coupons easily"
         },
         {
-            icon: <ShoppingCart sx={{ fontSize: 52 }} />,
-            title: "Purchase & Redeem",
-            description: "Customers can browse, purchase, and redeem coupons with intelligent limitations."
+            icon: <ShoppingCart sx={{ fontSize: 40 }} />,
+            title: "Shop Coupons",
+            description: "Browse and purchase available coupons"
         }
     ];
 
@@ -104,11 +104,12 @@ function Home(): JSX.Element {
                     sx={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
-                        py: 12,
-                        mb: 6,
+                        py: 8,
+                        mb: 4,
                         textAlign: 'center',
                         position: 'relative',
                         overflow: 'hidden',
+                        borderRadius: 4,
                         '&::before': {
                             content: '""',
                             position: 'absolute',
@@ -122,72 +123,48 @@ function Home(): JSX.Element {
                 >
                     <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
                         <Typography 
-                            variant="h1" 
+                            variant="h2" 
                             component="h1" 
                             gutterBottom
                             sx={{ 
                                 fontWeight: 700,
-                                mb: 3,
+                                mb: 2,
                                 textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                                fontSize: { xs: '2.5rem', md: '3.5rem' }
+                                fontSize: { xs: '2rem', md: '2.5rem' }
                             }}
                         >
-                            Welcome to the Future of Coupon Management
+                            Smart Coupon Management
                         </Typography>
                         <Typography 
-                            variant="h5" 
+                            variant="h6" 
                             sx={{ 
-                                mb: 4,
+                                mb: 3,
                                 opacity: 0.95,
-                                lineHeight: 1.6,
+                                lineHeight: 1.4,
                                 fontWeight: 400,
-                                maxWidth: '600px',
-                                margin: '0 auto 32px auto',
+                                maxWidth: '500px',
+                                margin: '0 auto 24px auto',
                             }}
                         >
-                            The ultimate platform for companies and customers to create, manage, and purchase promotional coupons
+                            Create, manage, and purchase coupons seamlessly
                         </Typography>
 
-                        <Button
-                            variant="contained"
-                            size="large"
-                            sx={{
-                                backgroundColor: 'white',
-                                color: 'primary.main',
-                                fontWeight: 600,
-                                px: 4,
-                                py: 1.5,
-                                fontSize: '1.1rem',
-                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-                                '&:hover': {
-                                    backgroundColor: 'grey.100',
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.3)',
-                                }
-                            }}
-                            onClick={() => {
-                                document.getElementById('features-section')?.scrollIntoView({ 
-                                    behavior: 'smooth' 
-                                });
-                            }}
-                        >
-                            Explore Features
-                        </Button>
+                     
                     </Container>
                 </Box>
             </Fade>
 
             {/* Features Section */}
-            <Container maxWidth="lg" sx={{ mb: 6, py: 4 }} id="features-section">
+            <Container maxWidth="lg" sx={{ mb: 4, py: 3 }} id="features-section">
                 <Fade in={isVisible} timeout={1200}>
                     <Typography 
-                        variant="h2" 
+                        variant="h4" 
                         component="h2" 
                         textAlign="center" 
                         gutterBottom
-                        sx={{ mb: 4, fontWeight: 600, color: 'primary.main' }}
+                        sx={{ mb: 3, fontWeight: 600, color: 'primary.main' }}
                     >
-                        Key Features
+                        Features
                     </Typography>
                 </Fade>
                 
@@ -208,47 +185,26 @@ function Home(): JSX.Element {
                                     }}
                                 >
                                     <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                        <Box sx={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            mb: 2,
-                                            color: 'primary.main' 
-                                        }}>
-                                            {feature.icon}
-                                            <Typography variant="h5" component="h3" sx={{ ml: 2, fontWeight: 600 }}>
+                                        <Box sx={{ textAlign: 'center', py: 2 }}>
+                                            <Box sx={{ color: 'primary.main', mb: 1 }}>
+                                                {feature.icon}
+                                            </Box>
+                                            <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
                                                 {feature.title}
                                             </Typography>
+                                            <Typography 
+                                                variant="body2" 
+                                                color="text.secondary"
+                                            >
+                                                {feature.description}
+                                            </Typography>
                                         </Box>
-                                        <Typography 
-                                            variant="body1" 
-                                            color="text.secondary" 
-                                            sx={{ lineHeight: 1.6 }}
-                                        >
-                                            {feature.description}
-                                        </Typography>
                                     </CardContent>
                                 </Card>
                             </Fade>
                         </Grid>
                     ))}
                 </Grid>
-            </Container>
-
-            {/* Call to Action */}
-            <Container maxWidth="md" sx={{ mb: 6, textAlign: 'center' }}>
-                <Fade in={isVisible} timeout={1800}>
-                    <Card sx={{ 
-                        p: 4, 
-                        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
-                    }}>
-                        <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            Ready to Get Started?
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                            Join our platform for seamless coupon management designed for optimal user experience.
-                        </Typography>
-                    </Card>
-                </Fade>
             </Container>
 
             {/* Scroll to top button */}

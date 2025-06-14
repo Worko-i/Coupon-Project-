@@ -30,6 +30,7 @@ function Header(): JSX.Element {
                 borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                 height: '70px',
                 justifyContent: 'center',
+                borderRadius: '0 0 0 0px',
             }}
         >
             <Toolbar 
