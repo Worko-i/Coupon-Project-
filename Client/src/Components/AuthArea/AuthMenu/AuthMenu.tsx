@@ -201,12 +201,12 @@ function AuthMenu(): JSX.Element {
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {user.email}
                     </Typography>
-                    <Chip 
+                    {/* <Chip 
                         label={user.clientType}
                         size="small"
                         color={getUserTypeColor() as any}
                         sx={{ mt: 1, fontSize: '0.7rem' }}
-                    />
+                    /> */}
                 </Box>
 
                 {/* Logout Option */}
