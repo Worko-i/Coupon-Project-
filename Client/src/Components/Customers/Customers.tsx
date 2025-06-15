@@ -7,12 +7,22 @@ import {
     Grid,
     Paper,
     Fade,
-    Container
+    Container,
+    TextField,
+    InputAdornment,
+    IconButton,
+    FormControl,
+    Select,
+    MenuItem,
+    InputLabel
 } from '@mui/material';
 import { 
     People, 
-    PersonAdd
+    PersonAdd,
+    Search,
+    Clear
 } from '@mui/icons-material';
+import { authStore } from '../../Redux/AuthState';
 import CustomerModel from '../../Models/CustomerModel';
 import customerService from '../../Services/CustomerService';
 import CustomerCard from './CustomerCard/CustomerCard';
@@ -25,19 +35,50 @@ import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
 function Customers(): JSX.Element{
     const [customers, setCustomers] = useState<CustomerModel[]>([]);
+    const [filteredCustomers, setFilteredCustomers] = useState<CustomerModel[]>([]);
     const [page, setPage] = useState<number>(0);
+    const [searchId, setSearchId] = useState<string>("");
+    const [filterType, setFilterType] = useState<string>("all");
     const customersPerPage = 12;
     const numberOfRecordsVisited = page * customersPerPage; 
-    const totalPages = Math.ceil(customers.length / customersPerPage);
+    const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
     const [loading, setLoading] = useState<boolean>(true);
+    const isAdmin = authStore.getState().user?.clientType === "ADMIN";
 
     const changePage = ({selected}: any) =>{
         setPage(selected);
     };
 
+    const handleFilterChange = (event: any) => {
+        setFilterType(event.target.value);
+        setSearchId("");
+        if (event.target.value === "all") {
+            setFilteredCustomers(customers);
+        }
+    };
+
+    const handleSearchById = () => {
+        if (searchId.trim() === "") {
+            setFilteredCustomers(customers);
+            return;
+        }
+        const id = parseInt(searchId);
+        if (!isNaN(id)) {
+            const found = customers.find(customer => customer.id === id);
+            setFilteredCustomers(found ? [found] : []);
+        }
+    };
+
+    const clearSearch = () => {
+        setSearchId("");
+        setFilteredCustomers(customers);
+        setFilterType("all");
+    };
+
     useEffect(() => {
         customerService.getCustomers().then((response) =>{
             setCustomers(response);
+            setFilteredCustomers(response);
             setTimeout(() => {
                 setLoading(false); 
             }, 1000); 
@@ -136,8 +177,77 @@ function Customers(): JSX.Element{
                 </Paper>
             </Fade>
 
+            {/* Admin Filter Section */}
+            {isAdmin && (
+                <Paper 
+                    elevation={3} 
+                    sx={{ 
+                        p: 3, 
+                        mb: 4, 
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+                    }}
+                >
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+                        Customer Filter
+                    </Typography>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={4}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>View Options</InputLabel>
+                                <Select
+                                    value={filterType}
+                                    label="View Options"
+                                    onChange={handleFilterChange}
+                                >
+                                    <MenuItem value="all">All Customers</MenuItem>
+                                    <MenuItem value="byId">Search by ID</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        
+                        {filterType === "byId" && (
+                          <Grid item xs={12} md={4}>
+                            <TextField
+                              label="Enter Customer ID"
+                              value={searchId}
+                              onChange={(e) => setSearchId(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && handleSearchById()}
+                              fullWidth
+                              size="small"
+                              type="number"
+                              InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <IconButton onClick={handleSearchById} edge="end" size="small">
+                                      <Search />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
+                        )}
+                        
+                        {(filterType !== "all" || searchId) && (
+                          <Grid item xs={12} md={4}>
+                            <Button
+                              variant="outlined"
+                              startIcon={<Clear />}
+                              onClick={clearSearch}
+                              size="small"
+                              fullWidth
+                            >
+                              Reset Filter
+                            </Button>
+                          </Grid>
+                        )}
+                    </Grid>
+                </Paper>
+            )}
+
             {/* Customers Grid */}
-            {customers.length === 0 ? (
+            {filteredCustomers.length === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
                     <Typography variant="h6" color="text.secondary">
                         No customers found
@@ -146,7 +256,7 @@ function Customers(): JSX.Element{
             ) : (
                 <>
                     <Grid container spacing={3} sx={{ mb: 4 }}>
-                        {customers
+                        {filteredCustomers
                             .slice(numberOfRecordsVisited, numberOfRecordsVisited + customersPerPage)
                             .map((customer, index) => (
                                 <Grid item xs={12} sm={6} md={4} lg={3} key={customer.id}>

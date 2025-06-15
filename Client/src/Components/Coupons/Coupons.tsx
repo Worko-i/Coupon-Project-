@@ -42,46 +42,51 @@ function Coupons(): JSX.Element {
     const numberOfRecordsVisited = page * couponPerPage;
     const totalPages = Math.ceil(couponsToShow.length / couponPerPage);
     const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>("");
 
     const changePage = ({ selected }: any) => {
         setPage(selected);
     };
 
     useEffect(() => {
-        categoryService.getAllCategories().then(response => {
+        const fetchData = async () => {
+            try {
+                // Fetch categories regardless of user type
+                await categoryService.getAllCategories();
 
-        }).catch(error => {
-            ErrorHandler.handleErrorResponse(error);
-        });
-
-        // return all coupons of the company if the user is a company
-        if (authStore.getState().user?.clientType === 'COMPANY') {
-            couponService.getCouponsByCompany(authStore.getState().user?.id!)
-                .then((response) => {
-                    setCouponsToShow(response);
-                    setTimeout(() => {
-                        setLoading(false);
-                    }, 1000);
-                })
-                .catch((error) => {
+                const currentUser = authStore.getState().user;
+                
+                if (!currentUser) {
+                    setError("User not authenticated");
                     setLoading(false);
-                    ErrorHandler.handleErrorResponse(error);
-                });
+                    return;
+                }
 
-            // return all coupons if the user is a customer in order of him being able to purchase
-        } else {
-            couponService.getCoupons()
-                .then((response) => {
-                    setCouponsToShow(response);
-                    setTimeout(() => {
+                if (currentUser.clientType === 'COMPANY') {
+                    if (!currentUser.id) {
+                        setError("Company ID not found");
                         setLoading(false);
-                    }, 1000);
-                })
-                .catch((error) => {
+                        return;
+                    }
+
+                    const response = await couponService.getCouponsByCompany(currentUser.id);
+                    setCouponsToShow(response);
+                } else {
+                    // For customers, fetch all available coupons
+                    const response = await couponService.getCoupons();
+                    setCouponsToShow(response);
+                }
+            } catch (error: any) {
+                setError(error.message || "Failed to load coupons");
+                ErrorHandler.handleErrorResponse(error);
+            } finally {
+                setTimeout(() => {
                     setLoading(false);
-                    ErrorHandler.handleErrorResponse(error);
-                });
-        }
+                }, 1000);
+            }
+        };
+
+        fetchData();
     }, []);
 
     // when the selected filter changes,Im setting default values to the coupon list according to the filter type.

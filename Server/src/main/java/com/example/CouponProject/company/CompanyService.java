@@ -19,4 +19,5 @@ public interface CompanyService {
     boolean isEmailAndPasswordExist(String email, String password);
     UserDetails findByEmail(String username) throws CompanyException;
     Map<String, Object> buildClaims(CompanyDTO companyDTO);
+    CompanyDTO getCompanyDetails() throws CompanyException;
 }

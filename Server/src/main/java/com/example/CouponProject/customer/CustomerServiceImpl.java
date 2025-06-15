@@ -127,6 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
         claims.put("email", customer.getEmail());
         claims.put("firstName", customer.getFirstName());
         claims.put("lastName", customer.getLastName());
+        claims.put("clientType", "CUSTOMER"); // Always add clientType
         return claims;
     }
 
@@ -143,5 +144,27 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public boolean isExist(Customer customer){
         return this.customerRepository.existsById(customer.getId());
+    }
+
+    @Override
+    public CustomerDTO getCustomerDetails() throws CustomerException {
+        try {
+            // Validate that the user is a customer
+            this.validateClient.validateUserIsCustomer();
+            
+            // Get the authenticated user's email from the security context
+            String userEmail = this.validateClient.getAuthenticatedUserEmail();
+            if (userEmail == null) {
+                throw new CustomerException(ErrorMessage.EMAIL_NOT_FOUND);
+            }
+            
+            // Find the customer by email
+            Customer customer = this.findByEmail(userEmail);
+            
+            // Map to DTO and return
+            return this.modelMapper.map(customer, CustomerDTO.class);
+        } catch (AuthorizationException e) {
+            throw new CustomerException(ErrorMessage.NOT_AUTHORIZED);
+        }
     }
 }

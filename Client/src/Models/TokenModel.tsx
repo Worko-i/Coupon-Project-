@@ -1,10 +1,13 @@
-class TokenModel{
-    token:string |null=null;
-    exp: number | null= null; // The expiration time of the token
+/**
+ * Model representing the token response from the server
+ */
+class TokenModel {
+    token: string | null = null;
+    expiration: number | null = null; // Server response expiration timestamp
 
-    constructor(token:string, expiration:number){
+    constructor(token: string, expiration: number) {
         this.token = token;
-        this.exp = expiration;
+        this.expiration = expiration;
     }
 }
 

@@ -52,17 +52,16 @@ function Coupon(): JSX.Element {
             setValue('amount', couponFromState.amount, {shouldValidate: true});
             setValue('price', couponFromState.price, {shouldValidate: true});
             setValue('image', couponFromState.image, {shouldValidate: true});
-            console.log(couponFromState.category);
-            console.log(categories);
+
         }
     },[categories])
 
 
     function sendCoupon(coupon: CouponModel): void {
-        console.log(coupon);
+
         if(params.couponId){
             coupon.id = +params.couponId;
-            console.log(coupon);
+
             couponService.updateCoupon(coupon.id, coupon).then(response => {
                 alert("The Coupon Has Been Updated Successfully");
                 navigate('/coupon-details/'+ coupon.id);

@@ -62,12 +62,25 @@ class CouponService {
     }
 
     async getCouponsByCompany(companyId: number): Promise<CouponModel[]> {
-        tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
+        if (!companyId || isNaN(companyId) || companyId <= 0) {
+            throw new Error("Invalid company ID");
+        }
 
-        const response = await axios.get<CouponModel[]>(appConfig.apiAddress + "company/coupon/byCompany/" + companyId,
-        {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
-        couponStore.dispatch({type:CouponActionType.FetchCoupons, payload:response.data});
-        return response.data;
+        tokenService.TokenExpiredHandler(authStore.getState()?.token!);
+
+        try {
+            const response = await axios.get<CouponModel[]>(
+                appConfig.apiAddress + "company/coupon/byCompany/" + companyId,
+                { headers: { "Authorization": "Bearer " + authStore.getState().token } }
+            );
+            couponStore.dispatch({ type: CouponActionType.FetchCoupons, payload: response.data });
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                throw new Error("Invalid company ID or company not found");
+            }
+            throw error;
+        }
     }
 }
 

@@ -28,7 +28,7 @@ function Login(): JSX.Element{
     function login(loginModel: LoginModel): void{
         authService.login(loginModel)
         .then(response =>{
-            console.log(authStore.getState().user?.id);
+
             alert("Login Successful!");
             navigate('/home');
         }).catch((error) =>{

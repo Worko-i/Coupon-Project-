@@ -20,8 +20,6 @@ class AuthService {
             const token: TokenModel = response.data;
             authStore.dispatch(loginAction(token));
             
-            console.log("Auth state after login:", authStore.getState());
-            
             // Set up auto logout when token is about to expire
             tokenService.setupAutoLogout(30); // Logout 30 seconds before expiration
             

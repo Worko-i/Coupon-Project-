@@ -70,11 +70,14 @@ public class AuthService {
                 try {
                     // Direct password validation for admin
                     if (loginRequestDTO.getPassword().equals("admin")) {
-                        // Create admin claims directly
+                        // Create admin claims with all required information
                         Map<String, Object> adminClaims = new HashMap<>();
+                        adminClaims.put("id", 0); // Admin has a fixed ID of 0
                         adminClaims.put("email", "admin@admin.com");
                         adminClaims.put("role", "ADMIN");
                         adminClaims.put("clientType", loginRequestDTO.getClientType());
+                        adminClaims.put("firstName", "System");
+                        adminClaims.put("lastName", "Administrator");
                         
                         // Set the client type in the shared object
                         this.clientTypeLoggedIn.setClientType(ClientType.ADMIN);
@@ -204,13 +207,23 @@ public class AuthService {
                     }
                 }
 
-                claims.put("clientType", loginRequestDTO.getClientType());
+                // Add clientType if not already present
+                if (!claims.containsKey("clientType")) {
+                    claims.put("clientType", loginRequestDTO.getClientType().toString());
+                }
+
+                // Generate token with claims
                 String token = this.tokenService.generateToken(claims);
+
+                // Get expiration from token and create response
                 Date expirationDate = this.tokenService.getExpirationFromToken(token);
-                return TokenResponseDTO.builder()
+                TokenResponseDTO response = TokenResponseDTO.builder()
                     .token(token)
                     .expiration(expirationDate.getTime())
                     .build();
+
+                System.out.println("Generated token with expiration: " + expirationDate);
+                return response;
             }
             else {
                 if (this.userService.loadUserByUsername(loginRequestDTO.getEmail()) == null){

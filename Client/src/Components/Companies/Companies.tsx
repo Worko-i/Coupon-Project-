@@ -7,9 +7,17 @@ import {
     Grid,
     Paper,
     Fade,
-    Container
+    Container,
+    TextField,
+    InputAdornment,
+    IconButton,
+    FormControl,
+    Select,
+    MenuItem,
+    InputLabel
 } from '@mui/material';
-import { Business, Add } from '@mui/icons-material';
+import { Business, Add, Search, Clear } from '@mui/icons-material';
+import { authStore } from '../../Redux/AuthState';
 import CompanyModel from '../../Models/CompanyModel';
 import companyService from '../../Services/CompanyService';
 import CompanyCard from './CompanyCard/CompanyCard';
@@ -21,14 +29,44 @@ import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 
 function Companies(): JSX.Element {
   const [companies, setCompanies] = useState<CompanyModel[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<CompanyModel[]>([]);
   const [page, setPage] = useState<number>(0);
+  const [searchId, setSearchId] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("all");
   const companiesPerPage = 12;
   const numberOfRecordsVisited = page * companiesPerPage;
-  const totalPages = Math.ceil(companies.length / companiesPerPage);
+  const totalPages = Math.ceil(filteredCompanies.length / companiesPerPage);
   const [loading, setLoading] = useState<boolean>(true);
+  const isAdmin = authStore.getState().user?.clientType === "ADMIN";
 
   const changePage = ({ selected }: any) => {
     setPage(selected);
+  };
+
+  const handleFilterChange = (event: any) => {
+    setFilterType(event.target.value as string);
+    setSearchId("");
+    if (event.target.value === "all") {
+      setFilteredCompanies(companies);
+    }
+  };
+
+  const handleSearchById = () => {
+    if (searchId.trim() === "") {
+      setFilteredCompanies(companies);
+      return;
+    }
+    const id = parseInt(searchId);
+    if (!isNaN(id)) {
+      const found = companies.find(company => company.id === id);
+      setFilteredCompanies(found ? [found] : []);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchId("");
+    setFilteredCompanies(companies);
+    setFilterType("all");
   };
 
   useEffect(() => {
@@ -36,6 +74,7 @@ function Companies(): JSX.Element {
       .getCompanies()
       .then((response) => {
         setCompanies(response);
+        setFilteredCompanies(response);
         setTimeout(() => {
           setLoading(false);
         }, 1000);
@@ -135,8 +174,77 @@ function Companies(): JSX.Element {
         </Paper>
       </Fade>
 
+      {/* Admin Filter Section */}
+      {isAdmin && (
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 3, 
+            mb: 4, 
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+            Companies Filter
+          </Typography>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>View Options</InputLabel>
+                <Select
+                  value={filterType}
+                  label="View Options"
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value="all">All Companies</MenuItem>
+                  <MenuItem value="byId">Search by ID</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            {filterType === "byId" && (
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Enter Company ID"
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearchById()}
+                  fullWidth
+                  size="small"
+                  type="number"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleSearchById} edge="end" size="small">
+                          <Search />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+            )}
+            
+            {(filterType !== "all" || searchId) && (
+              <Grid item xs={12} md={4}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Clear />}
+                  onClick={clearSearch}
+                  size="small"
+                  fullWidth
+                >
+                  Reset Filter
+                </Button>
+              </Grid>
+            )}
+          </Grid>
+        </Paper>
+      )}
+
       {/* Companies Grid */}
-      {companies.length === 0 ? (
+      {filteredCompanies.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
           <Typography variant="h6" color="text.secondary">
             No companies found
@@ -145,7 +253,7 @@ function Companies(): JSX.Element {
       ) : (
         <>
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            {companies
+            {filteredCompanies
               .slice(numberOfRecordsVisited, numberOfRecordsVisited + companiesPerPage)
               .map((company, index) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={company.id}>
@@ -183,14 +291,14 @@ function Companies(): JSX.Element {
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: 'primary.light',
+                    backgroundColor: 'secondary.light',
                     color: 'white',
                     transform: 'translateY(-1px)',
                   },
                   '&.active': {
-                    backgroundColor: 'primary.main',
+                    backgroundColor: 'secondary.main',
                     color: 'white',
-                    borderColor: 'primary.main',
+                    borderColor: 'secondary.main',
                   },
                   '&.disabled-page': {
                     opacity: 0.5,
@@ -202,7 +310,7 @@ function Companies(): JSX.Element {
                     },
                   },
                 },
-              }
+              },
             }}>
               <ReactPaginate
                 previousLabel={<ArrowBackIosIcon style={{ fontSize: 18 }} />}

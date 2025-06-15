@@ -106,7 +106,7 @@ Date: ${new Date().toLocaleString()}
             }, 2000);
             
         } catch (error) {
-            console.error('Error submitting feedback:', error);
+            // Error is handled by the error state and display
         } finally {
             setIsSubmitting(false);
         }

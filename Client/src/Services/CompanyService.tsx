@@ -60,6 +60,15 @@ class CompanyService {
         return companyStore.getState().companyList[index];
     }
 
+    async getCompanyDetails(): Promise<CompanyModel> {
+        tokenService.TokenExpiredHandler(authStore.getState()?.token!);
+        const response = await axios.get<CompanyModel>(
+            appConfig.apiAddress + "company/details",
+            {headers: {"Authorization" : "Bearer " + authStore.getState().token}}
+        );
+        return response.data;
+    }
+
 }
 
 const companyService: CompanyService = new CompanyService();

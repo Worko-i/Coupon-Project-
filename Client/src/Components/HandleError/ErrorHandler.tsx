@@ -18,7 +18,7 @@ class ErrorHandler {
         authService.logout();
       }
     }
-    console.log(error);
+    // Error handling is managed by the feedback dialog
   }
 }
 

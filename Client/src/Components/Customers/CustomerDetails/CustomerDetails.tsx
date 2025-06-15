@@ -18,8 +18,6 @@ import {
     DialogContentText,
     DialogActions,
     Fade,
-    Breadcrumbs,
-    Link,
     Grid
 } from '@mui/material';
 import {
@@ -29,7 +27,6 @@ import {
     Delete,
     ArrowBack,
     AdminPanelSettings,
-    Home
 } from '@mui/icons-material';
 import { authStore } from '../../../Redux/AuthState';
 import CustomerModel from '../../../Models/CustomerModel';
@@ -49,21 +46,37 @@ function CustomerDetails(): JSX.Element {
     const isCustomerView = currentUser?.clientType === "CUSTOMER";
     const isAdmin = currentUser?.clientType === "ADMIN";
 
+    const [error, setError] = useState<string>("");
+
     useEffect(() => {
-        if (!isCustomerView) {
-            customerService.getSingleCustomer(customerId)
-                .then((response) => {
-                    setCustomer(response);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    ErrorHandler.handleErrorResponse(error);
-                    setLoading(false);
-                });
-        } else {
+        // Reset error state
+        setError("");
+        
+        // Determine the ID to fetch: For customers, use their own ID from auth store, otherwise use the route param
+        const idToFetch = isCustomerView ? currentUser?.id : customerId;
+        
+        if (!idToFetch) {
+            setError("Customer ID not found");
             setLoading(false);
+            return;
         }
-    }, [customerId, isCustomerView]);
+
+        customerService.getSingleCustomer(idToFetch)
+            .then((response) => {
+                setCustomer(response);
+                setLoading(false);
+            })
+            .catch(error => {
+                // Check for specific error types
+                if (error.response?.status === 403) {
+                    setError("You don't have permission to view this customer's details");
+                } else {
+                    setError("Failed to load customer details");
+                    ErrorHandler.handleErrorResponse(error);
+                }
+                setLoading(false);
+            });
+    }, [customerId, isCustomerView, currentUser?.id]);
 
     function handleDeleteCustomer() {
         setLoading(true);
@@ -78,10 +91,9 @@ function CustomerDetails(): JSX.Element {
             });
     }
 
-    const displayUser = isCustomerView ? currentUser : customer;
-    const fullName = isCustomerView 
-        ? `${currentUser?.firstName} ${currentUser?.lastName}`
-        : `${customer?.firstName} ${customer?.lastName}`;
+    // Always use the customer data from the state, which contains full details
+    const displayUser = customer;
+    const fullName = customer ? `${customer.firstName} ${customer.lastName}` : "";
 
     if (loading) {
         return (
@@ -93,35 +105,38 @@ function CustomerDetails(): JSX.Element {
         );
     }
 
+    if (error) {
+        return (
+            <Container maxWidth="md" sx={{ py: 4 }}>
+                <Paper 
+                    elevation={3} 
+                    sx={{ 
+                        p: 4, 
+                        textAlign: 'center', 
+                        borderRadius: 3,
+                        bgcolor: 'error.light',
+                        color: 'error.contrastText'
+                    }}
+                >
+                    <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+                        {error}
+                    </Typography>
+                    <Button
+                        component={NavLink}
+                        to="/home"
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 2 }}
+                    >
+                        Return to Home
+                    </Button>
+                </Paper>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* Breadcrumbs */}
-            <Breadcrumbs sx={{ mb: 3 }}>
-                <Link
-                    component={NavLink}
-                    to="/home"
-                    underline="hover"
-                    color="inherit"
-                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                >
-                    <Home sx={{ fontSize: 20 }} />
-                    Home
-                </Link>
-                {!isCustomerView && (
-                    <Link
-                        component={NavLink}
-                        to="/customers"
-                        underline="hover"
-                        color="inherit"
-                    >
-                        Customers
-                    </Link>
-                )}
-                <Typography color="text.primary">
-                    {isCustomerView ? 'My Profile' : 'Customer Details'}
-                </Typography>
-            </Breadcrumbs>
-
             {/* Header */}
             <Fade in timeout={600}>
                 <Paper
@@ -160,7 +175,7 @@ function CustomerDetails(): JSX.Element {
                                 border: '3px solid rgba(255, 255, 255, 0.3)',
                             }}
                         >
-                            {fullName && fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            {fullName && fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                         </Avatar>
                         <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
                             {fullName}

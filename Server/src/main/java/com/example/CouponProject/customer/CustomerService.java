@@ -17,4 +17,5 @@ public interface CustomerService {
     Customer findByEmail(String email) throws CustomerException;
     boolean existsByEmailAndPassword(String email, String password);
     boolean isExist(Customer customer);
+    CustomerDTO getCustomerDetails() throws CustomerException;
 }

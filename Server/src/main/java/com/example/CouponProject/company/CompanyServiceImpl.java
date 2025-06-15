@@ -143,8 +143,34 @@ public class CompanyServiceImpl implements CompanyService{
         claims.put("id", company.getId());
         claims.put("email", company.getEmail());
         claims.put("name", company.getName());
+        claims.put("clientType", "COMPANY"); // Always add clientType
         return claims;
     }
 
-
+    @Override
+    public CompanyDTO getCompanyDetails() throws CompanyException {
+        try {
+            // Validate that the user is a company
+            validateClient.validateUserIsCompany();
+            
+            // Get the authenticated user's email
+            String userEmail = validateClient.getAuthenticatedUserEmail();
+            if (userEmail == null) {
+                throw new CompanyException(ErrorMessage.EMAIL_NOT_FOUND);
+            }
+            
+            // Find the company by email
+            UserDetails userDetails = findByEmail(userEmail);
+            if (!(userDetails instanceof Company)) {
+                throw new CompanyException(ErrorMessage.NOT_AUTHORIZED);
+            }
+            
+            Company company = (Company) userDetails;
+            
+            // Map to DTO and return
+            return modelMapper.map(company, CompanyDTO.class);
+        } catch (AuthorizationException e) {
+            throw new CompanyException(ErrorMessage.NOT_AUTHORIZED);
+        }
+    }
 }

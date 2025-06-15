@@ -13,10 +13,17 @@ export class AuthState{
         const tokenFromlocalStorage: string|null = localStorage.getItem("token");
 
         if(tokenFromlocalStorage){
-            const userFromToken: UserModel = jwtDecode(tokenFromlocalStorage);
-            this.user = userFromToken;
-            const tokenModel: TokenModel = jwtDecode(tokenFromlocalStorage);
-            this.exp = tokenModel.exp;
+            const decodedToken: any = jwtDecode(tokenFromlocalStorage);
+            this.user = {
+                id: decodedToken.id,
+                email: decodedToken.email,
+                clientType: decodedToken.clientType,
+                firstName: decodedToken.firstName,
+                lastName: decodedToken.lastName,
+                exp: decodedToken.exp,
+                iat: decodedToken.iat
+            };
+            this.exp = decodedToken.exp;
             this.token = tokenFromlocalStorage;
             
         }
@@ -56,13 +63,21 @@ export function authReducer(currentState: AuthState = new AuthState, action: Aut
             
             if(tokenData.token) {
                 const decodedToken: any = jwtDecode(tokenData.token);
+                
+                // Set expiration from token claims
+                newState.exp = decodedToken.exp;
+                
+                // Set user data from token claims
                 newState.user = {
+                    id: decodedToken.id,
                     email: decodedToken.email,
                     clientType: decodedToken.clientType,
+                    firstName: decodedToken.firstName,
+                    lastName: decodedToken.lastName,
                     exp: decodedToken.exp,
                     iat: decodedToken.iat
                 };
-                newState.exp = tokenData.exp;  // Store the expiration from the server response
+                
                 localStorage.setItem("token", tokenData.token);
             }
             break;

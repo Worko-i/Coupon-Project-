@@ -47,13 +47,20 @@ class CustomerService {
 
     async getSingleCustomer(id: number): Promise<CustomerModel> {
         tokenService.TokenExpiredHandler(authStore.getState()?.token!); // in order to prevent an error, logout if the token expired or null
-        if(customerStore.getState().customerList.length === 0){
-            const response = await axios.get<CustomerModel>(appConfig.apiAddress + "admin/customer/" + id,
-            {headers: {"Authorization" : "Bearer " + authStore.getState().token}});
-            return response.data;
-        }
-        const index = customerStore.getState().customerList.findIndex(customer => customer.id === id);
-        return customerStore.getState().customerList[index];
+        
+        const currentUser = authStore.getState().user;
+        const isCustomerViewingOwnProfile = currentUser?.clientType === "CUSTOMER" && currentUser?.id === id;
+        
+        // Use different endpoints based on user role
+        const endpoint = isCustomerViewingOwnProfile 
+            ? "customer/details"  // Endpoint for customers viewing their own details
+            : "admin/customer/" + id;  // Admin endpoint for viewing any customer
+            
+        const response = await axios.get<CustomerModel>(
+            appConfig.apiAddress + endpoint,
+            {headers: {"Authorization" : "Bearer " + authStore.getState().token}}
+        );
+        return response.data;
     }
 
 }

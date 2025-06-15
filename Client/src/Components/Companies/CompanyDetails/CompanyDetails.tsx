@@ -18,8 +18,6 @@ import {
     DialogContentText,
     DialogActions,
     Fade,
-    Breadcrumbs,
-    Link,
     Grid
 } from '@mui/material';
 import {
@@ -29,7 +27,6 @@ import {
     Delete,
     ArrowBack,
     AdminPanelSettings,
-    Home,
     LocalOffer
 } from '@mui/icons-material';
 import CompanyModel from '../../../Models/CompanyModel';
@@ -52,8 +49,9 @@ function CompanyDetails(): JSX.Element {
     const isAdmin = currentUser?.clientType === "ADMIN";
 
     useEffect(() => {
-        if (!isCompanyView) {
-            companyService.getSingleCompany(companyId)
+        if (isCompanyView) {
+            // Company viewing their own details
+            companyService.getCompanyDetails()
                 .then((company) => {
                     setCompany(company);
                     setLoading(false);
@@ -63,7 +61,16 @@ function CompanyDetails(): JSX.Element {
                     setLoading(false);
                 });
         } else {
-            setLoading(false);
+            // Admin viewing company details
+            companyService.getSingleCompany(companyId)
+                .then((company) => {
+                    setCompany(company);
+                    setLoading(false);
+                })
+                .catch(error => {
+                    ErrorHandler.handleErrorResponse(error);
+                    setLoading(false);
+                });
         }
     }, [companyId, isCompanyView]);
 
@@ -80,9 +87,10 @@ function CompanyDetails(): JSX.Element {
             });
     }
 
-    const displayCompany = isCompanyView ? currentUser : company;
-    const companyName = isCompanyView ? currentUser?.name : company?.name;
-    const companyEmail = isCompanyView ? currentUser?.email : company?.email;
+    // Always use the company data from the state, which contains full details
+    const displayCompany = company;
+    const companyName = company?.name;
+    const companyEmail = company?.email;
 
     if (loading) {
         return (
@@ -96,33 +104,6 @@ function CompanyDetails(): JSX.Element {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* Breadcrumbs */}
-            <Breadcrumbs sx={{ mb: 3 }}>
-                <Link
-                    component={NavLink}
-                    to="/home"
-                    underline="hover"
-                    color="inherit"
-                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                >
-                    <Home sx={{ fontSize: 20 }} />
-                    Home
-                </Link>
-                {!isCompanyView && (
-                    <Link
-                        component={NavLink}
-                        to="/companies"
-                        underline="hover"
-                        color="inherit"
-                    >
-                        Companies
-                    </Link>
-                )}
-                <Typography color="text.primary">
-                    {isCompanyView ? 'My Company' : 'Company Details'}
-                </Typography>
-            </Breadcrumbs>
-
             {/* Header */}
             <Fade in timeout={600}>
                 <Paper

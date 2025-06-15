@@ -66,7 +66,7 @@ class TokenService {
       
       setTimeout(() => {
         if (authStore.getState()?.token) {
-          console.log("Token expiring soon, logging out...");
+          // Token is about to expire, performing logout
           authService.logout();
         }
       }, logoutTime);

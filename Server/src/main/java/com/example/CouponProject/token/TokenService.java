@@ -30,14 +30,24 @@ public class TokenService {
         // Default constructor
     }
 
+    // Constant for token expiration duration (30 minutes)
+    private static final long TOKEN_EXPIRATION_DURATION = 1000 * 60 * 30; // 30 minutes
+
     // function that receives a map and creates a token
     public String generateToken(Map<String, Object> claims) {
-        long expirationDuration = 1000 * 60 * 30; // 30 minutes expiration as per requirements
+        long currentTimeMillis = System.currentTimeMillis();
+        Date issuedAt = new Date(currentTimeMillis);
+        Date expiration = new Date(currentTimeMillis + TOKEN_EXPIRATION_DURATION);
+
+        // Add standard claims
+        claims.put("iat", issuedAt.getTime() / 1000); // Standard JWT claim for issued at time
+        claims.put("exp", expiration.getTime() / 1000); // Standard JWT claim for expiration time
+
         return Jwts.builder()
                 .addClaims(claims)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationDuration))
-                .signWith(SignatureAlgorithm.HS256, secretKey) // defining the algorithm and the secret key of the token.
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 

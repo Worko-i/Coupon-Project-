@@ -40,4 +40,9 @@ public class CustomerController {
     public void deleteCustomer(@PathVariable int id) throws CustomerException, AuthorizationException {
         this.customerService.deleteCustomer(id);
     }
+
+    @GetMapping("/customer/details")
+    public CustomerDTO getCustomerDetails() throws CustomerException {
+        return this.customerService.getCustomerDetails();
+    }
 }

@@ -58,6 +58,14 @@ public class ValidateClient {
         }
     }
 
+    public String getAuthenticatedUserEmail() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return userDetails.getUsername();  // In Spring Security, username is typically the email
+        }
+        return null;
+    }
+
     // function that validates if the user is a customer
     public void validateUserIsCustomer() throws AuthorizationException {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
