@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.CouponProject.exception.AuthorizationException;
-import com.example.CouponProject.exception.CompanyException;
-import com.example.CouponProject.exception.CustomerException;
 import com.example.CouponProject.token.TokenService;
 
 @CrossOrigin

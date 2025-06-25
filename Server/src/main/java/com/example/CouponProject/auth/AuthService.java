@@ -1,6 +1,5 @@
 package com.example.CouponProject.auth;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,7 +63,7 @@ public class AuthService {
             if (loginRequestDTO.getEmail().equals("admin@admin.com")) {
                 if (loginRequestDTO.getClientType() != ClientType.ADMIN) {
                     System.out.println("Attempted to login as admin with incorrect client type: " + loginRequestDTO.getClientType());
-                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+                    throw new AuthorizationException(ErrorMessage.CLIENT_TYPE_ERROR);
                 }
                 
                 try {
@@ -116,14 +115,14 @@ public class AuthService {
             // Check if trying to log in as COMPANY
             if (loginRequestDTO.getClientType() == ClientType.COMPANY) {
                 if (!(userDetails instanceof CompanyDTO) && !(userDetails instanceof Company)) {
-                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+                    throw new AuthorizationException(ErrorMessage.CLIENT_TYPE_ERROR);
                 }
             }
 
             // Check if trying to log in as CUSTOMER
             if (loginRequestDTO.getClientType() == ClientType.CUSTOMER) {
                 if (!(userDetails instanceof CustomerDTO) && !(userDetails instanceof Customer)) {
-                    throw new AuthorizationException(ErrorMessage.NOT_AUTHORIZED);
+                    throw new AuthorizationException(ErrorMessage.CLIENT_TYPE_ERROR);
                 }
             }
             
