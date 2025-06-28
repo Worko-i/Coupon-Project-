@@ -10,7 +10,7 @@ The login/authentication process is role-based, with three possible roles: admin
 #### Front-end
 - React.js
 - REDUX
-- TypeScript + HTML
+- TypeScript + CSS
 
 #### Back-end
 - Java
